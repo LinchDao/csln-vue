@@ -6,7 +6,6 @@ export default {
   mutations: { },
   actions: {
     tree({ commit }) {
-      debugger
       return request({
         url: '/api/menu/tree',
         method: 'get'

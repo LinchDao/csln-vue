@@ -35,7 +35,6 @@ router.beforeEach(async(to, from, next) => {
         try {
           const userinfo = await store.dispatch('user/getInfo')
           const backendRoutes = await store.dispatch('menu/tree')
-          debugger
           const accessRoutes = await store.dispatch('permission/generateRoutes',
             { roles: userinfo.roles,
               backendRoutes: backendRoutes.data }
