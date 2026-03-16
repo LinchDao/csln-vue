@@ -367,16 +367,15 @@ export default {
         url: '/api/product/export',
         method: 'post',
         data: this.listQuery,
-        responseType: 'blob' // 重要：处理二进制文件
+        responseType: 'blob'
       }).then(res => {
-        // 处理文件下载
         const blob = new Blob([res])
         const fileName = `商品列表_${new Date().getTime()}.xlsx`
         const a = document.createElement('a')
         a.href = URL.createObjectURL(blob)
         a.download = fileName
         a.click()
-        URL.revokeObjectURL(a.href) // 释放URL对象
+        URL.revokeObjectURL(a.href)
         this.downloadLoading = false
         this.$message.success('导出成功')
       }).catch(() => {
@@ -385,21 +384,12 @@ export default {
       })
     },
 
-    // 获取排序样式
     getSortClass(key) {
       if (this.listQuery.sortField === key) {
         return this.listQuery.sortOrder === 'asc' ? 'sort-asc' : 'sort-desc'
       }
       return ''
-    },
-
-    // 其他空方法（保留扩展能力）
-    handleModifyStatus() {},
-    sortByID() {},
-    formatJson() { return [] },
-    handleFetchPv() {},
-    createData() {},
-    updateData() {}
+    }
   }
 }
 </script>
