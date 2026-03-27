@@ -12,12 +12,26 @@
           v-model="form.colorName"
           placeholder="点击下方按钮选择或手动输入"
           clearable
+          :disabled="isStockExist && !isUnlockedEdit"
         />
+
+        <el-button
+          v-if="isStockExist && !isUnlockedEdit"
+          type="warning"
+          size="mini"
+          style="margin-left: 10px"
+          @click="handleUnlockEdit"
+        >
+          存在库存，点击允许修改
+        </el-button>
       </el-form-item>
 
-      <!-- 颜色按钮组 -->
       <el-form-item label="选择颜色">
-        <el-radio-group v-model="form.colorName" size="small">
+        <el-radio-group
+          v-model="form.colorName"
+          size="small"
+          :disabled="isStockExist && !isUnlockedEdit"
+        >
           <el-radio-button
             v-for="c in availableColors"
             :key="c.id"
@@ -45,7 +59,6 @@
 
 <script>
 import ImageUpload from '@/components/ImageUpload'
-
 export default {
   name: 'ColorSelectDialog',
   components: { ImageUpload },
@@ -57,9 +70,12 @@ export default {
     return {
       innerVisible: false,
       availableColors: [],
+      isStockExist: false,
+      isUnlockedEdit: false,
       form: {
         colorName: '',
-        colorImageIdList: []
+        colorImageIdList: [],
+        skuIdList: []
       }
     }
   },
@@ -75,8 +91,12 @@ export default {
       handler(d) {
         if (d) {
           this.form = { ...d }
+          this.isStockExist = !!d.skuIdList && d.skuIdList.length > 0
+          this.isUnlockedEdit = false
         } else {
-          this.form = { colorName: '', colorImageIdList: [] }
+          this.form = { colorName: '', colorImageIdList: [], skuIdList: [] }
+          this.isStockExist = false
+          this.isUnlockedEdit = false
         }
       }
     }
@@ -84,10 +104,26 @@ export default {
   created() {
     this.availableColors = this.$store.getters['dict/getColorDict']
   },
+
   methods: {
     handleClose() {
       this.innerVisible = false
       this.$emit('update:visible', false)
+    },
+    // 解锁编辑
+    handleUnlockEdit() {
+      this.$confirm(
+        '该颜色存在库存，不建议修改！',
+        '警告',
+        {
+          confirmButtonText: '仍要修改',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      ).then(() => {
+        this.isUnlockedEdit = true
+        this.$message.success('已解锁，可以修改颜色')
+      })
     },
     submit() {
       if (!this.form.colorName) {
@@ -99,4 +135,5 @@ export default {
     }
   }
 }
+
 </script>

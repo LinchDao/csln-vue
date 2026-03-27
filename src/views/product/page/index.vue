@@ -104,15 +104,12 @@
       <el-table-column type="selection" width="55" align="center" />
 
       <el-table-column
-        label="ID"
-        prop="id"
-        sortable="custom"
+        label="序号"
         align="center"
         width="80"
-        :class-name="getSortClass('id')"
       >
-        <template slot-scope="{ row }">
-          <span>{{ row.id }}</span>
+        <template slot-scope="{ $index }">
+          <span>{{ (listQuery.page - 1) * listQuery.limit + $index + 1 }}</span>
         </template>
       </el-table-column>
 
@@ -125,13 +122,21 @@
         :class-name="getSortClass('productNo')"
       >
         <template slot-scope="{ row }">
-          <span>{{ row.productNo }}</span>
+          <span class="link-type" @click="handleDetail(row)">
+            {{ row.productNo }}
+          </span>
         </template>
       </el-table-column>
 
-      <el-table-column label="商品名称" min-width="200px">
+      <!-- <el-table-column label="商品名称" min-width="200px">
         <template slot-scope="{ row }">
           <span class="link-type" @click="handleUpdate(row)">{{ row.name }}</span>
+        </template>
+      </el-table-column> -->
+
+      <el-table-column label="商品名称" min-width="200px">
+        <template slot-scope="{ row }">
+          <span>{{ row.name }}</span>
         </template>
       </el-table-column>
 
@@ -264,6 +269,10 @@ export default {
     this.getList()
   },
   methods: {
+    // 跳转到商品详情页
+    handleDetail(row) {
+      this.$router.push({ path: `/product/detail/${row.id}` })
+    },
     // 获取商品列表
     getList() {
       this.listLoading = true
@@ -394,3 +403,13 @@ export default {
 }
 </script>
 
+<style scoped>
+.link-type {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.link-type:hover {
+  color: #66b1ff;
+}
+</style>

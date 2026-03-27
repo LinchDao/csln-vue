@@ -27,7 +27,7 @@
 
       <div class="productForm-main-container">
         <el-row :gutter="20">
-          <el-col :span="8">
+          <el-col :span="12">
             <el-form-item prop="productNo" label="款号：">
               <el-input
                 v-model="productForm.productNo"
@@ -37,7 +37,7 @@
               />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="12">
             <el-form-item prop="name" label="商品名称：">
               <el-input
                 v-model="productForm.name"
@@ -47,15 +47,7 @@
               />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
-            <el-form-item label="商品系列：">
-              <el-input
-                v-model="productForm.series"
-                placeholder="请输入商品系列（如运动系列）"
-                clearable
-              />
-            </el-form-item>
-          </el-col>
+
           <!-- 品牌/年份/季节（调整后） -->
           <el-col :span="8">
             <el-form-item prop="brand" label="品牌：">
@@ -131,7 +123,15 @@
               </el-radio-group>
             </el-form-item>
           </el-col>
-
+          <el-col :span="12">
+            <el-form-item label="商品系列：">
+              <el-input
+                v-model="productForm.series"
+                placeholder="请输入商品系列（如运动系列）"
+                clearable
+              />
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-row>
           <el-col :span="24">
@@ -146,7 +146,7 @@
               </el-checkbox>
               <!-- 尺码多选列表 -->
               <el-checkbox-group
-                v-model="productForm.sizeNameList"
+                v-model="productForm.sizeIds"
                 @change="handleSizeChange"
               >
                 <el-checkbox
@@ -247,7 +247,6 @@
 import Sticky from '@/components/Sticky'
 import ColorSelectDialog from './colordialog.vue'
 import TableImage from '@/components/tableImg'
-import request from '@/utils/request'
 
 // 表单默认值
 const defaultForm = {
@@ -263,7 +262,7 @@ const defaultForm = {
   retailPrice: '',
   status: '1',
   description: '',
-  sizeNameList: [],
+  sizeIds: [],
   colorList: []
 }
 
@@ -306,13 +305,12 @@ export default {
         retailPrice: [{ validator: validatePrice, trigger: 'blur', field: '零售价' }]
       },
 
+      // 颜色相关
       showColorDialog: false,
       editColorRow: null,
-
+      // 图片预览
       previewImageUrl: '',
-      previewDialogVisible: false,
-
-      skuList: []
+      previewDialogVisible: false
     }
   },
   computed: {
@@ -332,59 +330,18 @@ export default {
   },
   methods: {
     handleCheckAllChange(val) {
-      if (!val) {
-        const cannotRemoveSizes = this.skuList
-          .filter(sku =>
-            (sku.qty || 0) > 0 ||
-        (sku.lockQty || 0) > 0 ||
-        (sku.recoveryQty || 0) > 0
-          )
-          .map(sku => sku.sizeName)
-        const keepSizeList = Array.from(new Set(cannotRemoveSizes))
-
-        if (keepSizeList.length > 0) {
-          this.$message.info('已自动取消无库存尺码，有库存尺码已保留')
-        }
-
-        this.productForm.sizeNameList = keepSizeList
-        this.checkAll = false
-        return
-      }
-
-      // 全选：选中所有尺码
-      this.productForm.sizeNameList = this.sizeList.map(i => i.dictName)
-      this.checkAll = true
+      this.productForm.sizeIds = val ? this.sizeList.map(i => i.id) : []
     },
-    handleSizeChange(newSelectedSizes) {
-      const oldSizes = this.productForm.sizeNameList || []
-      const removedSize = oldSizes.find(s => !newSelectedSizes.includes(s))
-
-      if (removedSize) {
-        const skuItems = this.skuList.filter(sku => sku.sizeName === removedSize)
-        const hasStock = skuItems.some(sku =>
-          (sku.qty || 0) > 0 ||
-      (sku.lockQty || 0) > 0 ||
-      (sku.recoveryQty || 0) > 0
-        )
-
-        if (hasStock) {
-          this.$message.warning(`尺码【${removedSize}】存在库存，无法取消勾选！`)
-          this.productForm.sizeNameList = [...oldSizes]
-          return
-        }
-      }
-      this.checkAll = newSelectedSizes.length === this.sizeList.length
+    handleSizeChange(val) {
+      this.checkAll = val.length === this.sizeList.length
     },
     fetchSizeList() {
       this.sizeList = this.$store.getters['dict/getSizeDict']
     },
     openColorDialog() {
-      this.$nextTick(() => {
-        this.editColorRow = null
-        this.showColorDialog = true
-      })
+      this.editColorRow = null
+      this.showColorDialog = true
     },
-
     handleEditColor(row) {
       this.editColorRow = row
       this.showColorDialog = true
@@ -393,6 +350,7 @@ export default {
       if (this.editColorRow) {
         Object.assign(this.editColorRow, data)
         this.$message.success('修改颜色成功')
+        this.editColorRow = null
       } else {
         this.productForm.colorList.push({
           id: Date.now(),
@@ -400,20 +358,8 @@ export default {
         })
         this.$message.success('添加颜色成功')
       }
-
-      this.editColorRow = null
     },
     deleteColor(row) {
-      const hasStock = this.skuList.some(sku =>
-        sku.colorName === row.colorName &&
-    ((sku.qty || 0) > 0 || (sku.lockQty || 0) > 0 || (sku.recoveryQty || 0) > 0)
-      )
-
-      if (hasStock) {
-        this.$message.warning(`颜色【${row.colorName}】存在库存，无法删除！`)
-        return
-      }
-
       this.$confirm('确定删除该颜色吗？', '提示', { type: 'warning' }).then(() => {
         this.productForm.colorList = this.productForm.colorList.filter(i => i.id !== row.id)
         this.$message.success('删除成功')
@@ -424,66 +370,30 @@ export default {
       this.previewDialogVisible = true
     },
 
-    async fetchProductDetail(id) {
-      this.listLoading = true
-      try {
-        const res = await request({
-          url: `/api/product/${id}`,
-          method: 'get'
-        })
-
-        const data = res.data
-
+    // 商品详情
+    fetchProductDetail(id) {
+      setTimeout(() => {
         this.productForm = {
-          id: data.id,
-          productNo: data.productNo,
-          name: data.name,
-          brand: data.brand,
-          season: data.season,
-          year: data.year,
-          series: data.series,
-          costPrice: data.costPrice,
-          wholesalePrice: data.wholesalePrice,
-          retailPrice: data.retailPrice,
-          status: data.status + '',
-          mainImageId: data.mainImageId,
-
-          sizeNameList: [],
-          colorList: []
+          ...defaultForm,
+          id,
+          productNo: `PROD${id}`,
+          name: `测试商品${id}`,
+          brand: '耐克',
+          year: '2026',
+          season: '夏季',
+          series: '运动系列',
+          costPrice: '100.00',
+          wholesalePrice: '150.00',
+          retailPrice: '299.00',
+          status: '1',
+          colorList: [
+            { id: 1, colorName: '白色', colorImage: 'https://fuss10.oss-cn-beijing.aliyuncs.com/1/20230628/b06751c38704434395d06d09c42e106a.png' },
+            { id: 2, colorName: '黑色', colorImage: 'https://fuss10.oss-cn-beijing.aliyuncs.com/1/20230628/86d54f08c32c430c9d6c7d9c42e106a.png' }
+          ]
         }
-
-        const sizeSet = new Set(data.skuList.map(item => item.sizeName))
-        this.productForm.sizeNameList = Array.from(sizeSet)
-
-        const colorNameSet = new Set(data.skuList.map(item => item.colorName))
-
-        this.productForm.colorList = Array.from(colorNameSet).map(colorName => {
-          const imageList = data.productColorImageList.filter(img => img.colorName === colorName)
-          const colorImageIdList = imageList.map(img => img.colorFileId)
-
-          const skuIds = data.skuList
-            .filter(sku => sku.colorName === colorName)
-            .map(sku => sku.id)
-          const skuIdList = Array.from(new Set(skuIds))
-
-          return {
-            colorName: colorName,
-            colorImageIdList: colorImageIdList,
-            skuIdList: skuIdList
-          }
-        })
-
-        this.skuList = data.skuList
-
-        this.$nextTick(() => {
-          this.setPageTitle('编辑商品：' + data.name)
-        })
-      } catch (err) {
-        this.$message.error('获取商品详情失败')
-        console.error(err)
-      } finally {
-        this.listLoading = false
-      }
+        this.setTagsViewTitle()
+        this.setPageTitle(`编辑商品-${this.productForm.name}`)
+      }, 500)
     },
     setTagsViewTitle() {
       try {
@@ -499,30 +409,12 @@ export default {
       this.$refs.productForm.validate(valid => {
         if (valid) {
           this.loading = true
-          let url = ''
-          let method = ''
-          if (this.isEditMode) {
-            url = `/api/product/${this.productForm.id}`
-            method = 'put'
-          } else {
-            url = '/api/product/add'
-            method = 'post'
-          }
-
-          request({
-            url: url,
-            method: method,
-            data: this.productForm
-          })
-            .then(res => {
-              this.$message.success(this.isEditMode ? '修改成功' : '新增成功')
-              this.loading = false
-              this.$router.push('/product/page')
-            })
-            .catch(() => {
-              this.loading = false
-              this.$message.error(this.isEditMode ? '修改失败' : '新增失败')
-            })
+          setTimeout(() => {
+            console.log('提交数据：', this.productForm)
+            this.$message.success(this.isEditMode ? '修改成功' : '新增成功')
+            this.loading = false
+            this.$router.push('/product/page')
+          }, 800)
         }
       })
     },
