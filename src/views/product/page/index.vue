@@ -115,28 +115,24 @@
 
       <el-table-column
         label="商品编号"
-        prop="productNo"
         sortable="custom"
         align="center"
         width="160"
         :class-name="getSortClass('productNo')"
       >
-        <template slot-scope="{ row }">
-          <span class="link-type" @click="handleDetail(row)">
-            {{ row.productNo }}
-          </span>
+        <template slot-scope="scope">
+          <el-link
+            type="primary"
+            @click="handleDetail(scope.row)"
+          >
+            {{ scope.row.productNo }}
+          </el-link>
         </template>
       </el-table-column>
 
-      <!-- <el-table-column label="商品名称" min-width="200px">
-        <template slot-scope="{ row }">
-          <span class="link-type" @click="handleUpdate(row)">{{ row.name }}</span>
-        </template>
-      </el-table-column> -->
-
       <el-table-column label="商品名称" min-width="200px">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
+          <span class="link-type" @click="handleUpdate(row)">{{ row.name }}</span>
         </template>
       </el-table-column>
 
@@ -403,13 +399,3 @@ export default {
 }
 </script>
 
-<style scoped>
-.link-type {
-  color: #409eff;
-  cursor: pointer;
-  text-decoration: underline;
-}
-.link-type:hover {
-  color: #66b1ff;
-}
-</style>
