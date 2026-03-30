@@ -1,5 +1,6 @@
 // 系统数据字典 常量配置
 export const DICT_KEY = {
   SIZE: 'DICT_SIZE',
-  COLOR: 'DICT_COLOR'
+  COLOR: 'DICT_COLOR',
+  PRUCHASE_ORDER_STATUS: '2037432276712738817'
 }

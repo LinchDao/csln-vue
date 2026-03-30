@@ -36,6 +36,7 @@ const actions = {
   async loadAllDict({ dispatch }) {
     await dispatch('loadDict', DICT_KEY.SIZE)
     await dispatch('loadDict', DICT_KEY.COLOR)
+    await dispatch('loadDict', DICT_KEY.PRUCHASE_ORDER_STATUS)
   },
 
   // 清空某个字典缓存（编辑后用）
@@ -47,7 +48,8 @@ const actions = {
 const getters = {
 
   getSizeDict: (state) => state.dictCache[DICT_KEY.SIZE] || [],
-  getColorDict: (state) => state.dictCache[DICT_KEY.COLOR] || []
+  getColorDict: (state) => state.dictCache[DICT_KEY.COLOR] || [],
+  getPurchaseOrderStatus: (state) => state.dictCache[DICT_KEY.PRUCHASE_ORDER_STATUS] || []
 
 }
 
