@@ -230,12 +230,16 @@ export default {
 }
 
 .main-info-card, .item-info-card {
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+
   .card-title {
     font-size: 16px;
     font-weight: 600;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #ebeef5;
+    color: #303133;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e4e7ed;
   }
 
   .info-row {
@@ -253,14 +257,17 @@ export default {
     }
 
     .info-label {
-      color: #666;
-      font-weight: 500;
-      width: 80px;
+      color: #303133;
+      font-weight: 700;
+      width: 100px;
       flex-shrink: 0;
     }
 
     .info-value {
-      color: #333;
+      color: #303133;
+      display: inline-block;
+      min-width: 60px;
+      white-space: nowrap;
       flex: 1;
       word-break: break-all;
     }
@@ -272,8 +279,8 @@ export default {
 }
 
 :deep(.el-table) {
-  --el-table-header-text-color: #666;
-  --el-table-row-hover-bg-color: #f8f9fa;
+  --el-table-header-text-color: #303133;
+  --el-table-row-hover-bg-color: #fafbfc;
 }
 
 :deep(.el-table__empty-text) {

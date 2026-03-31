@@ -273,6 +273,9 @@ export default {
   .detail-text {
     font-size: 14px;
     color: #303133;
+    display: inline-block;
+    min-width: 60px;
+    white-space: nowrap;
 
     &.price {
       color: #f56c6c;
@@ -284,6 +287,15 @@ export default {
   ::v-deep .el-form-item__label {
     font-weight: 700 !important; /* 加粗 */
     color: #303133 !important;
+  }
+
+  ::v-deep .el-table {
+    --el-table-header-text-color: #303133;
+    --el-table-row-hover-bg-color: #fafbfc;
+  }
+
+  ::v-deep .el-tag {
+    margin: 0;
   }
 }
 </style>
