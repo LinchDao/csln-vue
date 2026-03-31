@@ -11,6 +11,9 @@
 
     <!-- 操作按钮 -->
     <div class="operate-bar">
+      <el-button type="success" icon="el-icon-box-add" @click="handleCreateInstock">
+        创建入库单
+      </el-button>
       <el-button type="primary" icon="el-icon-edit" @click="handleEdit">
         编辑采购单
       </el-button>
@@ -191,6 +194,11 @@ export default {
     // 返回采购单列表页
     handleBack() {
       this.$router.push('/purchase/order/page')
+    },
+    handleCreateInstock() {
+      this.$router.push({
+        path: `/stock/in/create/${this.purchaseId}`
+      })
     }
   }
 }
