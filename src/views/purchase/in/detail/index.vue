@@ -1,5 +1,5 @@
 <template>
-  <div class="purchaseInForm-container">
+  <div class="purchaseInForm-container template-detail-container">
     <el-form
       :model="purchaseDetail"
       class="form-container"
@@ -33,8 +33,8 @@
       <!-- 主体内容：分段式 el-form 布局 -->
       <div class="purchaseInForm-main-container">
         <!-- 入库单基础信息段 -->
-        <div class="detail-section">
-          <div class="section-title">入库单基础信息</div>
+        <div class="detail-section template-section">
+          <div class="section-title template-section__title">入库单基础信息</div>
           <el-row :gutter="20">
             <el-col :span="8">
               <el-form-item label="入库单号">
@@ -69,8 +69,8 @@
           </el-row>
         </div>
         <!-- 入库单统计信息段 -->
-        <div class="detail-section">
-          <div class="section-title">入库单统计信息</div>
+        <div class="detail-section template-section template-section--mt16">
+          <div class="section-title template-section__title">入库单统计信息</div>
           <el-row :gutter="20">
             <el-col :span="8">
               <el-form-item label="入库总数量">
@@ -90,8 +90,8 @@
           </el-row>
         </div>
         <!-- 入库商品明细段 -->
-        <div class="detail-section">
-          <div class="section-title">入库商品明细</div>
+        <div class="detail-section template-section template-section--mt16">
+          <div class="section-title template-section__title">入库商品明细</div>
           <el-table
             v-loading="loading"
             :data="purchaseDetail.purchaseInItem || []"

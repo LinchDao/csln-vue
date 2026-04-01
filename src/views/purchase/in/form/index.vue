@@ -1,5 +1,5 @@
 <template>
-  <div class="purchase-detail-container">
+  <div class="app-container purchase-detail-container template-form-container">
     <!-- 面包屑/标题 -->
     <div class="page-header">
       <el-breadcrumb separator="/">
@@ -9,7 +9,7 @@
       <h3 class="page-title">采购单详情 & 入库操作</h3>
     </div>
     <!-- 操作按钮 + 仓库选择：新增仓库下拉 -->
-    <div class="operate-bar" style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="operate-bar template-operate-bar" style="display: flex; justify-content: space-between; align-items: center;">
       <div class="warehouse-select">
         <label class="select-label" style="margin-right: 10px; font-weight: 500;">入库仓库：</label>
         <el-select
@@ -39,58 +39,58 @@
       </div>
     </div>
     <!-- 主信息卡片：仅展示核心入库相关字段 -->
-    <el-card shadow="hover" class="main-info-card">
-      <div class="card-title">采购单主信息</div>
+    <el-card shadow="hover" class="main-info-card template-section">
+      <div class="card-title template-section__title">采购单主信息</div>
       <el-row class="info-row" :gutter="20">
         <el-col :span="6">
-          <div class="info-item">
-            <label class="info-label">采购单号：</label>
-            <span class="info-value">{{ purchaseDetail.purchaseNo || '-' }}</span>
+          <div class="info-item template-info-item">
+            <label class="info-label template-info-item__label">采购单号：</label>
+            <span class="info-value template-info-item__value">{{ purchaseDetail.purchaseNo || '-' }}</span>
           </div>
         </el-col>
         <el-col :span="6">
-          <div class="info-item">
-            <label class="info-label">订单状态：</label>
+          <div class="info-item template-info-item">
+            <label class="info-label template-info-item__label">订单状态：</label>
             <el-tag :type="getStatusTagType">{{ getStatusName }}</el-tag>
           </div>
         </el-col>
         <el-col :span="6">
-          <div class="info-item">
-            <label class="info-label">制单人：</label>
-            <span class="info-value">{{ purchaseDetail.createUserName || '-' }}</span>
+          <div class="info-item template-info-item">
+            <label class="info-label template-info-item__label">制单人：</label>
+            <span class="info-value template-info-item__value">{{ purchaseDetail.createUserName || '-' }}</span>
           </div>
         </el-col>
         <el-col :span="6">
-          <div class="info-item">
-            <label class="info-label">下单时间：</label>
-            <span class="info-value">{{ purchaseDetail.orderTime || '-' }}</span>
+          <div class="info-item template-info-item">
+            <label class="info-label template-info-item__label">下单时间：</label>
+            <span class="info-value template-info-item__value">{{ purchaseDetail.orderTime || '-' }}</span>
           </div>
         </el-col>
       </el-row>
       <el-row class="info-row" :gutter="20" style="margin-top: 15px;">
         <el-col :span="6">
-          <div class="info-item">
-            <label class="info-label">到货时间：</label>
-            <span class="info-value">{{ purchaseDetail.arrivalTime || '-' }}</span>
+          <div class="info-item template-info-item">
+            <label class="info-label template-info-item__label">到货时间：</label>
+            <span class="info-value template-info-item__value">{{ purchaseDetail.arrivalTime || '-' }}</span>
           </div>
         </el-col>
         <el-col :span="6">
-          <div class="info-item">
-            <label class="info-label">总数量：</label>
-            <span class="info-value">{{ purchaseDetail.totalQty || 0 }}</span>
+          <div class="info-item template-info-item">
+            <label class="info-label template-info-item__label">总数量：</label>
+            <span class="info-value template-info-item__value">{{ purchaseDetail.totalQty || 0 }}</span>
           </div>
         </el-col>
         <el-col :span="12">
-          <div class="info-item full-width">
-            <label class="info-label">备注：</label>
-            <span class="info-value">{{ purchaseDetail.remark || '无' }}</span>
+          <div class="info-item full-width template-info-item">
+            <label class="info-label template-info-item__label">备注：</label>
+            <span class="info-value template-info-item__value">{{ purchaseDetail.remark || '无' }}</span>
           </div>
         </el-col>
       </el-row>
     </el-card>
     <!-- 商品明细卡片（带入库操作：新增已入库列+input入库数量+一键填写） -->
-    <el-card shadow="hover" class="item-info-card" style="margin-top: 20px;">
-      <div class="card-title">采购商品明细 & 入库操作</div>
+    <el-card shadow="hover" class="item-info-card template-section template-section--mt16">
+      <div class="card-title template-section__title">采购商品明细 & 入库操作</div>
       <el-table
         v-loading="loading"
         :data="purchaseDetail.purchaseOrderItem || []"
@@ -378,7 +378,6 @@ export default {
 <style lang="scss" scoped>
 .purchase-detail-container {
   background: #f5f7fa;
-  padding: 20px;
   min-height: calc(100vh - 60px);
 }
 .page-header {

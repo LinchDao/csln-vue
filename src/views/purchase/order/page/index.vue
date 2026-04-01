@@ -1,7 +1,8 @@
 <template>
-  <div class="purchase-order-page">
+  <div class="app-container purchase-order-page template-page-container">
     <!-- 查询条件 -->
-    <el-form :model="queryParams" inline @keyup.enter.native="handleFilter">
+    <el-form :model="queryParams" inline class="template-section" @keyup.enter.native="handleFilter">
+      <div class="template-section__title">查询条件</div>
       <el-row>
         <el-col :span="8">
           <el-form-item label="采购单号">
@@ -28,7 +29,7 @@
       </el-row>
       <el-row style="margin-top: 15px;">
         <el-col :span="24">
-          <div style="text-align: center;">
+          <div class="template-operate-bar template-operate-bar--center">
             <el-form-item>
               <el-button
                 v-waves
@@ -216,7 +217,6 @@ export default {
 
 <style scoped>
 .purchase-order-page {
-  padding: 20px;
-  background: #fff;
+  background: transparent;
 }
 </style>

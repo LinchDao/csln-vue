@@ -1,5 +1,5 @@
 <template>
-  <div class="productForm-container">
+  <div class="productForm-container template-detail-container">
     <el-form
       :model="productForm"
       class="form-container"
@@ -15,8 +15,8 @@
       <!-- 主体内容：el-form 布局 -->
       <div class="productForm-main-container">
         <!-- 基础信息 -->
-        <div class="detail-section">
-          <div class="section-title">基础信息</div>
+        <div class="detail-section template-section">
+          <div class="section-title template-section__title">基础信息</div>
           <el-row :gutter="20">
             <el-col :span="8">
               <el-form-item label="款号">
@@ -53,8 +53,8 @@
         </div>
 
         <!-- 价格信息 -->
-        <div class="detail-section">
-          <div class="section-title">价格信息</div>
+        <div class="detail-section template-section template-section--mt16">
+          <div class="section-title template-section__title">价格信息</div>
           <el-row :gutter="20">
             <el-col :span="8">
               <el-form-item label="成本价">
@@ -83,8 +83,8 @@
         </div>
 
         <!-- 尺码信息 -->
-        <div class="detail-section">
-          <div class="section-title">可选尺码</div>
+        <div class="detail-section template-section template-section--mt16">
+          <div class="section-title template-section__title">可选尺码</div>
           <el-form-item label="尺码">
             <el-tag
               v-for="(item, index) in productForm.sizeNameList"
@@ -98,8 +98,8 @@
         </div>
 
         <!-- 颜色图片 -->
-        <div class="detail-section">
-          <div class="section-title">颜色及图片</div>
+        <div class="detail-section template-section template-section--mt16">
+          <div class="section-title template-section__title">颜色及图片</div>
           <el-table
             :data="productForm.colorList"
             border

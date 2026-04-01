@@ -1,14 +1,15 @@
 <template>
-  <div class="app-container">
+  <div class="app-container template-page-container">
     <!-- 基于 el-form 的筛选表单 -->
     <el-form
       ref="filterForm"
       :model="listQuery"
       inline
-      class="filter-container"
+      class="filter-container template-section"
       label-position="right"
       label-width="80px"
     >
+      <div class="template-section__title">查询条件</div>
       <el-row :gutter="20">
         <el-col :span="6">
           <!-- 款号筛选 -->
@@ -47,7 +48,7 @@
 
       <el-row style="margin-top: 15px;">
         <el-col :span="24">
-          <div style="text-align: center;">
+          <div class="template-operate-bar template-operate-bar--center">
             <el-form-item>
               <el-button
                 v-waves
@@ -398,4 +399,3 @@ export default {
   }
 }
 </script>
-

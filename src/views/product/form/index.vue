@@ -1,5 +1,5 @@
 <template>
-  <div class="productForm-container">
+  <div class="productForm-container template-form-container">
     <el-form
       ref="productForm"
       :model="productForm"
@@ -25,7 +25,7 @@
         </el-button>
       </sticky>
 
-      <div class="productForm-main-container">
+      <div class="productForm-main-container template-section">
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item prop="productNo" label="款号：">
@@ -163,10 +163,10 @@
         </el-row>
 
         <!-- 商品颜色表格 -->
-        <el-row>
+        <el-row class="template-section template-section--mt16">
           <el-col :span="24">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <span style="font-weight: 500;">商品颜色：</span>
+              <span class="template-section__title" style="margin-bottom: 0;">商品颜色：</span>
               <el-button type="primary" size="small" icon="el-icon-plus" @click="openColorDialog">
                 新增颜色
               </el-button>
@@ -535,9 +535,9 @@ export default {
 
 <style lang="scss" scoped>
 .productForm-container {
-  background: #fff;
+  background: transparent;
   min-height: calc(100vh - 60px);
-  .form-container { padding: 20px; }
+  .form-container { padding: 20px; background: #fff; border-radius: 8px; }
   .productForm-main-container { padding: 20px 0; }
 }
 ::v-deep .el-input-number, ::v-deep .el-date-editor { width: 100%; }

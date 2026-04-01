@@ -73,3 +73,50 @@ div:focus {
   transition: 600ms ease position;
   background: white;
 }
+
+// template page shared styles
+.template-section {
+  background: #fff;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  padding: 16px 20px;
+}
+
+.template-section__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 16px;
+}
+
+.template-section--mt16 {
+  margin-top: 16px;
+}
+
+.template-operate-bar {
+  margin-bottom: 16px;
+  text-align: right;
+}
+
+.template-operate-bar--center {
+  text-align: center;
+  margin-top: 4px;
+}
+
+.template-info-item {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.template-info-item__label {
+  color: #606266;
+  min-width: 88px;
+  margin-right: 8px;
+  font-weight: 600;
+}
+
+.template-info-item__value {
+  color: #303133;
+  word-break: break-all;
+}

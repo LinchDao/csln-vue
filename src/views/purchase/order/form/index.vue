@@ -1,5 +1,5 @@
 <template>
-  <div class="purchaseForm-container">
+  <div class="purchaseForm-container template-form-container">
     <el-form
       ref="purchaseForm"
       :model="purchaseForm"
@@ -24,7 +24,7 @@
           取消
         </el-button>
       </sticky>
-      <div class="purchaseForm-main-container">
+      <div class="purchaseForm-main-container template-section">
         <el-row>
           <el-col :span="8">
             <el-form-item prop="purchaseNo" label="采购单号：">
@@ -164,9 +164,9 @@
           </el-col>
         </el-row>
 
-        <el-row style="margin-top:10px;">
+        <el-row class="template-section template-section--mt16" style="margin-top:10px;">
           <el-col :span="24">
-            <div style="font-weight:500; margin-bottom:10px;">采购商品明细</div>
+            <div class="template-section__title" style="margin-bottom:10px;">采购商品明细</div>
           </el-col>
           <el-col :span="24">
             <el-table
@@ -555,9 +555,13 @@ export default {
 
 <style lang="scss" scoped>
 .purchaseForm-container {
-  background: #fff;
-  padding: 20px;
+  background: transparent;
   min-height: calc(100vh - 60px);
+}
+.form-container {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
 }
 .el-form-item {
   width: 100%;
