@@ -327,7 +327,7 @@ export default {
       try {
         const res = await request({
           url: '/api/product/no/name/list',
-          method: 'get'
+          method: 'post'
         })
         this.productAllList = res.data || []
         this.filterProductList = this.productAllList

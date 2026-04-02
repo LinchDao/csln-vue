@@ -23,7 +23,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <!-- 订单类型筛选 -->
+          <!-- 订单类型筛选（对接字典枚举：getMasterOrderTypes） -->
           <el-form-item label="订单类型">
             <el-select
               v-model="listQuery.orderType"
@@ -31,37 +31,46 @@
               clearable
               @change="handleFilter"
             >
-              <el-option label="现货" value="1" />
-              <el-option label="预售" value="2" />
-              <el-option label="分批发货" value="3" />
+              <el-option
+                v-for="item in masterOrderTypes"
+                :key="item.dictValue"
+                :label="item.dictName"
+                :value="item.dictValue"
+              />
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <!-- 订单状态筛选 -->
+          <!-- 订单状态筛选：改为单选下拉（对接字典枚举：getMasterOrderStatus） -->
           <el-form-item label="订单状态">
-            <el-radio-group v-model="listQuery.status" @change="handleFilter">
-              <el-radio label="">全部</el-radio>
-              <el-radio label="1">待处理</el-radio>
-              <el-radio label="2">已完成</el-radio>
-              <el-radio label="3">已取消</el-radio>
-            </el-radio-group>
+            <el-select
+              v-model="listQuery.status"
+              placeholder="请选择订单状态"
+              clearable
+              @change="handleFilter"
+            >
+              <el-option label="全部" value="" />
+              <el-option
+                v-for="item in masterOrderStatus"
+                :key="item.dictValue"
+                :label="item.dictName"
+                :value="item.dictValue"
+              />
+            </el-select>
           </el-form-item>
         </el-col>
-
       </el-row>
-      <el-row :gutter="20">
+      <!-- 恢复草稿状态筛选（查询条件保留原来的样子） -->
+      <el-row :gutter="20" style="margin-top: 15px;">
         <el-col :span="8">
-          <!-- 是否草稿筛选 -->
-          <el-form-item label="是否草稿">
+          <el-form-item label="草稿状态">
             <el-radio-group v-model="listQuery.isDraft" @change="handleFilter">
               <el-radio label="">全部</el-radio>
+              <el-radio label="1">草稿</el-radio>
               <el-radio label="0">正式单</el-radio>
-              <el-radio label="1">草稿单</el-radio>
             </el-radio-group>
           </el-form-item>
         </el-col>
-
         <el-col :span="16">
           <el-form-item class="template-operate-bar template-operate-bar--center">
             <el-button
@@ -102,6 +111,7 @@
           </el-form-item>
         </el-col>
       </el-row>
+
     </el-form>
     <!-- 表格部分 完全匹配商品列表结构 -->
     <el-table
@@ -141,14 +151,18 @@
           </el-link>
         </template>
       </el-table-column>
-      <el-table-column label="客户ID" prop="customerId" align="center" width="120px" />
-      <el-table-column label="门店ID" prop="shopId" align="center" width="120px" />
-      <el-table-column label="总数量" prop="totalQty" align="center" width="100px">
+      <!-- 客户ID改为客户名称 -->
+      <el-table-column label="客户名称" prop="customerName" align="center" min-width="120" />
+      <!-- 门店ID改为门店名称 -->
+      <el-table-column label="门店名称" prop="shopName" align="center" min-width="200" />
+      <el-table-column label="仓库名称" prop="warehouseNames" align="center" min-width="200" />
+
+      <el-table-column label="总数量" prop="totalQty" align="center" width="120">
         <template slot-scope="{ row }">
           <span>{{ row.totalQty }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="总金额" prop="totalAmount" align="center" width="120px">
+      <el-table-column label="总金额" prop="totalAmount" align="center" width="120">
         <template slot-scope="{ row }">
           <span>¥{{ row.totalAmount }}</span>
         </template>
@@ -156,32 +170,27 @@
       <el-table-column
         label="订单类型"
         align="center"
-        width="120px"
+        width="150"
       >
         <template slot-scope="{ row }">
-          <el-tag v-if="row.orderType === 1">现货</el-tag>
-          <el-tag v-else-if="row.orderType === 2" type="warning">预售</el-tag>
-          <el-tag v-else-if="row.orderType === 3" type="info">分批发货</el-tag>
+          {{ getDictLabel(masterOrderTypes, row.orderType) }}
         </template>
       </el-table-column>
       <el-table-column label="开单时间" prop="createTime" width="200px" align="center" />
-      <el-table-column label="草稿状态" class-name="status-col" width="100" align="center">
-        <template slot-scope="{ row }">
-          <el-tag :type="row.isDraft === 1 ? 'warning' : 'success'">
-            {{ row.isDraft === 1 ? '草稿单' : '正式单' }}
-          </el-tag>
-        </template>
-      </el-table-column>
       <el-table-column label="订单状态" class-name="status-col" width="100" align="center">
         <template slot-scope="{ row }">
-          <el-tag v-if="row.status === 1">待处理</el-tag>
-          <el-tag v-else-if="row.status === 2" type="success">已完成</el-tag>
-          <el-tag v-else-if="row.status === 3" type="danger">已取消</el-tag>
+          {{ getDictLabel(masterOrderStatus, row.status) }}
         </template>
       </el-table-column>
+
       <el-table-column label="操作" align="center" width="180" class-name="small-padding fixed-width">
         <template slot-scope="{ row, $index }">
-          <el-button type="primary" size="mini" :disabled="row.isDraft === 0" @click="handleUpdate(row)">
+          <el-button
+            type="primary"
+            size="mini"
+            :disabled="!(row.isDraft === 1 || [0, 1, 4].includes(Number(row.status)))"
+            @click="handleUpdate(row)"
+          >
             编辑
           </el-button>
           <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row, $index)">
@@ -200,17 +209,15 @@
     />
   </div>
 </template>
-
 <script>
 // 保留原文件的内联引入，未拆分任何请求
 import request from '@/utils/request'
 import waves from '@/directive/waves'
 import Pagination from '@/components/Pagination'
-
 export default {
   name: 'OrderList',
   components: { Pagination },
-  directives: { waves }, // 注册waves指令
+  directives: { waves },
   data() {
     return {
       tableKey: 0,
@@ -219,32 +226,50 @@ export default {
       listLoading: true,
       downloadLoading: false,
       selectedList: [], // 批量选择的行数据
-      // 订单查询参数，匹配表字段，格式和商品列表一致
+      // 恢复isDraft参数（草稿状态筛选）
       listQuery: {
         page: 1,
         limit: 20,
         orderNo: undefined, // 订单号
-        orderType: undefined, // 订单类型 1现货2预售3分批发货
-        status: undefined, // 订单状态 1待处理2已完成3已取消
-        isDraft: undefined, // 是否草稿 0正式1草稿
+        orderType: undefined, // 订单类型（字典dictValue）
+        status: undefined, // 订单状态（字典dictValue）
+        isDraft: '', // 草稿状态：''=全部，1=草稿，0=正式单
         sortField: undefined, // 排序字段
         sortOrder: undefined // 排序方式 asc/desc
       }
+    }
+  }, // 注册waves指令
+  computed: {
+    // 订单类型枚举（从字典获取）
+    masterOrderTypes() {
+      return this.$store.getters['dict/getMasterOrderTypes'] || []
+    },
+    // 订单状态枚举（从字典获取）
+    masterOrderStatus() {
+      return this.$store.getters['dict/getMasterOrderStatus'] || []
     }
   },
   created() {
     this.getList()
   },
   methods: {
+    // 通用方法：根据字典列表和dictValue获取dictName
+    getDictLabel(dictList, dictValue) {
+      console.log(dictList)
+      if (dictValue === null || dictValue === undefined || dictValue === '') return '未知'
+      const val = Number(dictValue)
+      const item = dictList.find(item => Number(item.dictValue) === val)
+      return item ? item.dictName : '未知'
+    },
     // 跳转到订单详情页
     handleDetail(row) {
-      this.$router.push({ path: `/order/detail/${row.id}` })
+      this.$router.push({ path: `/shop/order/detail/${row.id}` })
     },
-    // 获取订单列表 内联request，和商品列表请求格式一致
+    // 获取订单列表 内联request，携带isDraft参数
     getList() {
       this.listLoading = true
       const query = { ...this.listQuery }
-      request({ url: '/api/order/page', method: 'post', data: query })
+      request({ url: '/api/order/master/page', method: 'post', data: query })
         .then(res => {
           this.list = res.data.rows
           this.total = res.data.total
@@ -260,7 +285,7 @@ export default {
       this.listQuery.page = 1
       this.getList()
     },
-    // 重置筛选条件 重置所有参数+表单，和商品列表逻辑一致
+    // 重置筛选条件 恢复isDraft参数重置
     handleReset() {
       this.listQuery = {
         page: 1,
@@ -268,7 +293,7 @@ export default {
         orderNo: undefined,
         orderType: undefined,
         status: undefined,
-        isDraft: undefined,
+        isDraft: '', // 重置为全部
         sortField: undefined,
         sortOrder: undefined
       }
@@ -305,11 +330,11 @@ export default {
     },
     // 新增订单 路由跳转
     handleCreate() {
-      this.$router.push({ path: '/order/create' })
+      this.$router.push({ path: '/shop/order/create' })
     },
-    // 编辑订单 路由跳转，仅草稿单可编辑
+    // 编辑订单 路由跳转，仅草稿单可编辑（isDraft仍从接口返回，不显示仅用于判断）
     handleUpdate(row) {
-      this.$router.push({ path: `/order/edit/${row.id}` })
+      this.$router.push({ path: `/shop/order/edit/${row.id}` })
     },
     // 删除订单 内联request，delete请求，和商品列表逻辑一致
     handleDelete(row, index) {
