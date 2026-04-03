@@ -1,6 +1,6 @@
 <template>
-  <div class="app-container template-detail-container">
-    <div class="template-operate-bar">
+  <div class="app-container template-detail-container template-detail-layout">
+    <div class="template-operate-bar template-action-group">
       <el-button type="primary" icon="el-icon-edit" @click="handleEdit">
         编辑
       </el-button>
@@ -131,3 +131,9 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.template-operate-bar {
+  justify-content: flex-end;
+}
+</style>

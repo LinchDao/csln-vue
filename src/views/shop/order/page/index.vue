@@ -61,7 +61,7 @@
         </el-col>
       </el-row>
       <!-- 恢复草稿状态筛选（查询条件保留原来的样子） -->
-      <el-row :gutter="20" style="margin-top: 15px;">
+      <el-row :gutter="20" class="template-filter-row">
         <el-col :span="8">
           <el-form-item label="草稿状态">
             <el-radio-group v-model="listQuery.isDraft" @change="handleFilter">
@@ -72,7 +72,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="16">
-          <el-form-item class="template-operate-bar template-operate-bar--center">
+          <el-form-item class="template-operate-bar template-operate-bar--center template-action-group">
             <el-button
               v-waves
               type="primary"
@@ -84,7 +84,7 @@
             <el-button
               v-waves
               icon="el-icon-refresh"
-              style="margin-left: 10px;"
+              class="template-btn-gap"
               @click="handleReset"
             >
               重置
@@ -93,7 +93,7 @@
               v-waves
               type="primary"
               icon="el-icon-plus"
-              style="margin-left: 10px;"
+              class="template-btn-gap"
               @click="handleCreate"
             >
               新增订单
@@ -103,7 +103,7 @@
               :loading="downloadLoading"
               type="success"
               icon="el-icon-download"
-              style="margin-left: 10px;"
+              class="template-btn-gap"
               @click="handleDownload"
             >
               导出Excel
@@ -121,7 +121,8 @@
       border
       fit
       highlight-current-row
-      style="width: 100%;"
+      class="template-table-section"
+      style="width: 100%; margin-top: 16px;"
       @sort-change="sortChange"
       @selection-change="handleSelectionChange"
     >

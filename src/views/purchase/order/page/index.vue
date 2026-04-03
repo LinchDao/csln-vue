@@ -27,9 +27,9 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <el-row style="margin-top: 15px;">
+      <el-row class="template-filter-row">
         <el-col :span="24">
-          <div class="template-operate-bar template-operate-bar--center">
+          <div class="template-operate-bar template-operate-bar--center template-action-group">
             <el-form-item>
               <el-button
                 v-waves
@@ -42,7 +42,7 @@
               <el-button
                 v-waves
                 icon="el-icon-refresh"
-                style="margin-left: 10px;"
+                class="template-btn-gap"
                 @click="handleReset"
               >
                 重置
@@ -50,7 +50,7 @@
               <el-button
                 type="primary"
                 icon="el-icon-plus"
-                style="margin-left: 10px;"
+                class="template-btn-gap"
                 @click="handleCreate"
               >
                 新增采购单
@@ -60,7 +60,7 @@
                 :loading="downloadLoading"
                 type="success"
                 icon="el-icon-download"
-                style="margin-left: 10px;"
+                class="template-btn-gap"
                 @click="handleDownload"
               >
                 导出Excel
@@ -72,7 +72,7 @@
     </el-form>
 
     <!-- 订单列表表格 -->
-    <el-table v-loading="loading" :data="list" border style="width:100%;margin-top:10px;">
+    <el-table v-loading="loading" :data="list" border class="template-table-section" style="width: 100%; margin-top: 16px;">
       <el-table-column label="行号" type="index" align="center" width="80" />
       <el-table-column label="采购单号" align="center" width="160">
         <template slot-scope="scope">
@@ -109,7 +109,7 @@
           <el-button
             type="danger"
             size="mini"
-            style="margin-left: 8px;"
+            class="template-btn-gap-sm"
             :disabled="[1, 2, 3].includes(scope.row.status)"
             @click="handleCancel(scope.row)"
           >
@@ -280,28 +280,13 @@ export default {
   padding: 0 20px;
 }
 
-.template-section {
-  background: #fff;
-  padding: 16px;
-  border-radius: 4px;
-  margin-bottom: 16px;
-}
-
-.template-section__title {
-  font-size: 15px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: #333;
+.template-filter-row {
+  margin-top: 15px;
 }
 
 .template-operate-bar--center {
   display: flex;
   justify-content: center;
-}
-
-/* 按钮间距优化 */
-.el-button + .el-button {
-  margin-left: 10px !important;
 }
 
 /* 表格操作列按钮间距 */

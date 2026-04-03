@@ -1,13 +1,12 @@
 <template>
-  <div class="template-form-container">
+  <div class="template-form-container template-form-layout">
     <!-- 顶部操作栏：返回按钮居右，新增配货完成+发货按钮 -->
     <sticky :z-index="10" class-name="sub-navbar">
-      <div style="display: flex; justify-content: flex-end;">
+      <div class="template-action-group stock-detail-actions">
         <!-- 分配按钮：仅子单状态为1（待分配）时显示 -->
         <el-button
           v-if="Number(formData.status) === 1"
           type="success"
-          style="margin-right: 10px;"
           @click="handleAssign"
         >
           分配配货员
@@ -16,7 +15,6 @@
         <el-button
           v-if="Number(formData.status) === 2"
           type="primary"
-          style="margin-right: 10px;"
           @click="handlePickingComplete"
         >
           配货完成
@@ -25,7 +23,6 @@
         <el-button
           v-if="[2, 3].includes(Number(formData.status))"
           type="warning"
-          style="margin-right: 10px;"
           @click="handleShip"
         >
           发货
@@ -419,12 +416,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// 完全复用主订单详情页的样式，无额外新增
-.template-form-container {
-  background: #f5f7fa;
-  padding: 20px;
-  min-height: calc(100vh - 60px);
-}
 .total-card {
   height: 100%;
   .total-item {
@@ -452,18 +443,6 @@ export default {
     }
   }
 }
-.template-info-item--top {
-  align-items: flex-start;
-}
-.template-info-item__value--multiline {
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-.template-section__title--sub {
-  font-size: 14px;
-  margin-top: 20px;
-  margin-bottom: 10px;
-}
 ::v-deep .el-table__summary {
   background-color: #fafafa !important;
   .el-table__cell {
@@ -482,5 +461,9 @@ export default {
   ::v-deep .el-button {
     margin-bottom: 10px;
   }
+}
+
+.stock-detail-actions {
+  justify-content: flex-end;
 }
 </style>

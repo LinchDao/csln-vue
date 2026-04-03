@@ -46,9 +46,9 @@
         <el-col :span="6" />
       </el-row>
 
-      <el-row style="margin-top: 15px;">
+      <el-row class="template-filter-row">
         <el-col :span="24">
-          <div class="template-operate-bar template-operate-bar--center">
+          <div class="template-operate-bar template-operate-bar--center template-action-group">
             <el-form-item>
               <el-button
                 v-waves
@@ -61,7 +61,7 @@
               <el-button
                 v-waves
                 icon="el-icon-refresh"
-                style="margin-left: 10px;"
+                class="template-btn-gap"
                 @click="handleReset"
               >
                 重置
@@ -69,7 +69,7 @@
               <el-button
                 type="primary"
                 icon="el-icon-plus"
-                style="margin-left: 10px;"
+                class="template-btn-gap"
                 @click="handleCreate"
               >
                 添加商品
@@ -79,7 +79,7 @@
                 :loading="downloadLoading"
                 type="success"
                 icon="el-icon-download"
-                style="margin-left: 10px;"
+                class="template-btn-gap"
                 @click="handleDownload"
               >
                 导出Excel
@@ -98,7 +98,8 @@
       border
       fit
       highlight-current-row
-      style="width: 100%;"
+      class="template-table-section"
+      style="width: 100%; margin-top: 16px;"
       @sort-change="sortChange"
       @selection-change="handleSelectionChange"
     >

@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="template-form-container">
+  <div class="template-form-container template-form-layout">
     <el-form
       ref="formRef"
       :model="formData"
@@ -14,7 +14,7 @@
           v-if="isEditMode && formData.isDraft === 0"
           v-loading="loading"
           type="primary"
-          style="margin-left: 10px;"
+          class="template-btn-gap"
           @click="submitForm('formal')"
         >
           提交修改
@@ -25,7 +25,7 @@
           <el-button
             v-loading="loading"
             type="warning"
-            style="margin-left: 10px;"
+            class="template-btn-gap"
             @click="submitForm('draft')"
           >
             保存草稿
@@ -33,7 +33,7 @@
           <el-button
             v-loading="loading"
             type="primary"
-            style="margin-left: 10px;"
+            class="template-btn-gap"
             @click="submitForm('submitDraft')"
           >
             提交修改
@@ -45,7 +45,7 @@
           <el-button
             v-loading="loading"
             type="warning"
-            style="margin-left: 10px;"
+            class="template-btn-gap"
             @click="submitForm('createDraft')"
           >
             保存草稿
@@ -53,14 +53,14 @@
           <el-button
             v-loading="loading"
             type="primary"
-            style="margin-left: 10px;"
+            class="template-btn-gap"
             @click="submitForm('createFormal')"
           >
             提交订单
           </el-button>
         </template>
 
-        <el-button style="margin-left: 10px;" @click="cancelForm">
+        <el-button class="template-btn-gap" @click="cancelForm">
           取消
         </el-button>
       </sticky>
@@ -777,26 +777,9 @@ export default {
 
 <style lang="scss" scoped>
 // 样式保持统一规范
-.template-form-container {
-  background: #f5f7fa;
-  min-height: calc(100vh - 60px);
-  padding: 20px;
-}
 .template-form-body {
   .el-card {
     border: 1px solid #e4e7ed;
-  }
-  .template-section {
-    &__title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 15px;
-      padding-bottom: 5px;
-      border-bottom: 1px solid #e4e7ed;
-    }
-    &--mt16 {
-      margin-top: 16px;
-    }
   }
   .total-card {
     height: 100%;
@@ -840,3 +823,4 @@ export default {
   }
 }
 </style>
+

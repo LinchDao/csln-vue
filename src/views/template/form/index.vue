@@ -1,5 +1,5 @@
 <template>
-  <div class="template-form-container">
+  <div class="template-form-container template-form-layout">
     <el-form
       ref="formRef"
       :model="formData"
@@ -11,12 +11,12 @@
         <el-button
           v-loading="loading"
           type="primary"
-          style="margin-left: 10px;"
+          class="template-btn-gap"
           @click="submitForm"
         >
           {{ isEditMode ? '保存修改' : '新建' }}
         </el-button>
-        <el-button style="margin-left: 10px;" @click="cancelForm">
+        <el-button class="template-btn-gap" @click="cancelForm">
           取消
         </el-button>
       </sticky>
@@ -65,7 +65,7 @@
             type="primary"
             size="mini"
             icon="el-icon-plus"
-            style="float: right;"
+            class="template-line-add-btn"
             @click="addLineItem"
           >
             新增行
@@ -221,13 +221,15 @@ export default {
 <style lang="scss" scoped>
 .template-form-container {
   background: #f5f7fa;
-  min-height: calc(100vh - 60px);
-  padding: 20px;
 }
 
 .template-form-body {
   .el-card {
     border: 1px solid #e4e7ed;
+  }
+
+  .template-line-add-btn {
+    float: right;
   }
 }
 </style>

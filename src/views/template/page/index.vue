@@ -5,7 +5,7 @@
       :model="queryParams"
       inline
       label-width="88px"
-      class="template-section"
+      class="template-section template-query-section"
       @keyup.enter.native="handleFilter"
     >
       <div class="template-section__title">查询条件</div>
@@ -46,7 +46,7 @@
         </el-col>
       </el-row>
 
-      <div class="template-operate-bar template-operate-bar--center">
+      <div class="template-operate-bar template-operate-bar--center template-action-group">
         <el-button
           v-waves
           type="primary"
@@ -78,6 +78,7 @@
       border
       fit
       highlight-current-row
+      class="template-table-section"
       style="width: 100%; margin-top: 16px;"
     >
       <el-table-column label="序号" width="80" align="center">
@@ -190,6 +191,10 @@ export default {
 .template-page-container {
   .el-form-item {
     margin-bottom: 18px;
+  }
+
+  .template-action-group {
+    justify-content: center;
   }
 }
 </style>

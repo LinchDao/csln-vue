@@ -1,5 +1,5 @@
 <template>
-  <div class="productForm-container template-detail-container">
+  <div class="productForm-container template-detail-container template-detail-layout">
     <el-form
       :model="productForm"
       class="form-container"

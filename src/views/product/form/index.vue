@@ -1,5 +1,5 @@
-<template>
-  <div class="productForm-container template-form-container">
+﻿<template>
+  <div class="productForm-container template-form-container template-form-layout">
     <el-form
       ref="productForm"
       :model="productForm"
@@ -10,7 +10,7 @@
       <sticky :z-index="10" class-name="sub-navbar">
         <el-button
           v-loading="loading"
-          style="margin-left: 10px;"
+          class="template-btn-gap"
           type="primary"
           @click="submitForm"
         >
@@ -18,7 +18,7 @@
         </el-button>
         <el-button
           type="default"
-          style="margin-left: 10px;"
+          class="template-btn-gap"
           @click="cancelForm"
         >
           取消
@@ -31,7 +31,7 @@
             <el-form-item prop="productNo" label="款号：">
               <el-input
                 v-model="productForm.productNo"
-                placeholder="请输入商品款号（如PROD2026）"
+                placeholder="请输入商品款号（如 PROD2026）"
                 maxlength="50"
                 clearable
               />
@@ -56,7 +56,7 @@
               />
             </el-form-item>
           </el-col>
-          <!-- 品牌/年份/季节（调整后） -->
+          <!-- 品牌/年份/季节 -->
           <el-col :span="8">
             <el-form-item prop="brand" label="品牌：">
               <el-input
@@ -136,7 +136,7 @@
         <el-row>
           <el-col :span="24">
             <el-form-item label="可选尺码：">
-              <!-- 全选框 -->
+              <!-- 全选 -->
               <el-checkbox
                 v-model="checkAll"
                 style="margin-bottom: 10px; display: block;"
@@ -368,7 +368,7 @@ export default {
         )
 
         if (hasStock) {
-          this.$message.warning(`尺码【${removedSize}】存在库存，无法取消勾选！`)
+          this.$message.warning(`尺码【${removedSize}】存在库存，无法取消勾选`)
           this.productForm.sizeNameList = [...oldSizes]
           return
         }
@@ -410,7 +410,7 @@ export default {
       )
 
       if (hasStock) {
-        this.$message.warning(`颜色【${row.colorName}】存在库存，无法删除！`)
+        this.$message.warning(`颜色【${row.colorName}】存在库存，无法删除`)
         return
       }
 
@@ -476,7 +476,7 @@ export default {
         this.skuList = data.skuList
 
         this.$nextTick(() => {
-          this.setPageTitle('编辑商品：' + data.name)
+          this.setPageTitle(`编辑商品：${data.name}`)
         })
       } catch (err) {
         this.$message.error('获取商品详情失败')
@@ -543,3 +543,4 @@ export default {
 ::v-deep .el-input-number, ::v-deep .el-date-editor { width: 100%; }
 ::v-deep .el-radio { margin-right: 20px; }
 </style>
+

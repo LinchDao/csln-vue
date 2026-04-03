@@ -91,7 +91,7 @@
       <!-- 操作按钮 -->
       <el-row :gutter="20">
         <el-col :span="24">
-          <div style="display: flex; justify-content: center;">
+          <div class="template-operate-bar template-operate-bar--center template-action-group stock-order-actions-center">
             <el-button
               v-waves
               type="primary"
@@ -103,7 +103,7 @@
             <el-button
               v-waves
               icon="el-icon-refresh"
-              style="margin-left: 10px;"
+              class="template-btn-gap"
               @click="handleReset"
             >
               重置
@@ -113,7 +113,7 @@
               :loading="downloadLoading"
               type="success"
               icon="el-icon-download"
-              style="margin-left: 10px;"
+              class="template-btn-gap"
               @click="handleDownload"
             >
               导出Excel
@@ -131,7 +131,8 @@
       border
       fit
       highlight-current-row
-      style="width: 100%;"
+      class="template-table-section"
+      style="width: 100%; margin-top: 16px;"
       @sort-change="sortChange"
       @selection-change="handleSelectionChange"
     >
@@ -552,25 +553,11 @@ export default {
 </script>
 
 <style scoped>
-/* 基础样式适配，可根据项目全局样式调整 */
-.app-container {
-  padding: 20px;
-  background: #f5f7fa;
-  min-height: calc(100vh - 60px);
-}
-.template-section {
-  background: #fff;
-  margin-bottom: 20px;
-  border-radius: 4px;
-}
-.template-section__title {
-  font-size: 16px;
-  font-weight: 600;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 16px;
-}
 .filter-container {
   padding-bottom: 16px;
+}
+
+.stock-order-actions-center {
+  justify-content: center;
 }
 </style>

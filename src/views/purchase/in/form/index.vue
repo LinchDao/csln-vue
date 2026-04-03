@@ -1,7 +1,7 @@
 <template>
-  <div class="app-container purchase-detail-container template-form-container">
+  <div class="app-container purchase-detail-container template-form-container template-form-layout">
     <!-- 面包屑/标题 -->
-    <div class="page-header">
+    <div class="page-header template-page-header">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item><a href="/purchase/order/page">采购单管理</a></el-breadcrumb-item>
         <el-breadcrumb-item>采购单详情 & 入库操作</el-breadcrumb-item>
@@ -9,9 +9,9 @@
       <h3 class="page-title">采购单详情 & 入库操作</h3>
     </div>
     <!-- 操作按钮 + 仓库选择：新增仓库下拉 -->
-    <div class="operate-bar template-operate-bar" style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="operate-bar template-operate-bar purchase-in-operate">
       <div class="warehouse-select">
-        <label class="select-label" style="margin-right: 10px; font-weight: 500;">入库仓库：</label>
+        <label class="select-label purchase-in-label">入库仓库：</label>
         <el-select
           v-model="selectedWarehouseId"
           placeholder="请选择入库仓库"
@@ -30,10 +30,10 @@
         <el-button type="primary" icon="el-icon-check" :disabled="!canInstock || !selectedWarehouseId" @click="handleSubmitInstock">
           提交入库
         </el-button>
-        <el-button type="warning" icon="el-icon-refresh" :disabled="!canInstock" style="margin-left: 10px;" @click="handleAllOneKeyFill">
+        <el-button type="warning" icon="el-icon-refresh" :disabled="!canInstock" class="template-btn-gap" @click="handleAllOneKeyFill">
           全部一键填写
         </el-button>
-        <el-button icon="el-icon-arrow-left" style="margin-left: 10px;" @click="handleBack">
+        <el-button icon="el-icon-arrow-left" class="template-btn-gap" @click="handleBack">
           返回列表
         </el-button>
       </div>
@@ -381,9 +381,6 @@ export default {
   min-height: calc(100vh - 60px);
 }
 .page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 20px;
   .page-title {
     font-size: 18px;
@@ -393,16 +390,23 @@ export default {
 }
 .operate-bar {
   margin-bottom: 20px;
+}
+
+.purchase-in-operate {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   text-align: right;
-  button {
-    & + button {
-      margin-left: 10px;
-    }
-  }
-  .warehouse-select {
-    display: flex;
-    align-items: center;
-  }
+}
+
+.warehouse-select {
+  display: flex;
+  align-items: center;
+}
+
+.purchase-in-label {
+  margin-right: 10px;
+  font-weight: 500;
 }
 .main-info-card, .item-info-card {
   .card-title {

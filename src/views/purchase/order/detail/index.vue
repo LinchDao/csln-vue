@@ -1,7 +1,7 @@
 <template>
-  <div class="app-container purchase-detail-container template-detail-container">
+  <div class="app-container purchase-detail-container template-detail-container template-detail-layout">
     <!-- 面包屑/标题 -->
-    <div class="page-header">
+    <div class="page-header template-page-header">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item><a href="/purchase/order">采购单管理</a></el-breadcrumb-item>
         <el-breadcrumb-item>采购单详情</el-breadcrumb-item>
@@ -10,7 +10,7 @@
     </div>
 
     <!-- 操作按钮 -->
-    <div class="operate-bar template-operate-bar">
+    <div class="operate-bar template-operate-bar template-action-group">
       <el-button type="success" icon="el-icon-box-add" @click="handleCreateInstock">
         创建入库单
       </el-button>
@@ -211,11 +211,6 @@ export default {
 }
 
 .page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-
   .page-title {
     font-size: 18px;
     font-weight: 600;
@@ -225,7 +220,7 @@ export default {
 
 .operate-bar {
   margin-bottom: 20px;
-  text-align: right;
+  justify-content: flex-end;
 }
 
 .main-info-card, .item-info-card {

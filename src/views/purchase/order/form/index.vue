@@ -1,5 +1,5 @@
-<template>
-  <div class="purchaseForm-container template-form-container">
+﻿<template>
+  <div class="purchaseForm-container template-form-container template-form-layout">
     <el-form
       ref="purchaseForm"
       :model="purchaseForm"
@@ -10,7 +10,7 @@
       <sticky :z-index="10" class-name="sub-navbar">
         <el-button
           v-loading="loading"
-          style="margin-left: 10px;"
+          class="template-btn-gap"
           type="primary"
           @click="submitForm"
         >
@@ -18,7 +18,7 @@
         </el-button>
         <el-button
           type="default"
-          style="margin-left: 10px;"
+          class="template-btn-gap"
           @click="cancelForm"
         >
           取消
@@ -72,7 +72,7 @@
           </el-col>
         </el-row>
 
-        <!-- 业务时间字段：下单时间 + 到货时间（全驼峰命名） -->
+        <!-- 业务时间字段：下单时间 + 到货时间 -->
         <el-row>
           <el-col :span="8">
             <el-form-item label="下单时间：">
@@ -253,20 +253,20 @@ import Sticky from '@/components/Sticky'
 import request from '@/utils/request'
 import ProductSkuSelectDialog from './ProductSkuSelectDialog'
 
-// 表单默认值（全驼峰命名，与后端DTO完全一致）
+// 表单默认值（全驼峰命名，与后端 DTO 完全一致）
 const defaultForm = {
   id: undefined,
-  purchaseNo: '', // 采购单号
-  supplierId: '', // 供应商ID
-  totalQty: 0, // 总数量
-  totalAmount: 0.00, // 总金额
-  status: 0, // 状态（0待入库 1部分入库 2已完成 3取消）
-  createUserId: '', // 制单人ID
-  createTime: '', // 系统创建时间（自动生成，不可编辑）
-  orderTime: new Date().toISOString().split('T')[0], // 默认当前日期（格式：yyyy-MM-dd）
-  arrivalTime: '', // 到货时间（用户可编辑）
-  remark: '', // 备注
-  purchaseOrderItem: [] // 采购明细列表（子DTO数组，全驼峰）
+  purchaseNo: '',
+  supplierId: '',
+  totalQty: 0,
+  totalAmount: 0.00,
+  status: 0,
+  createUserId: '',
+  createTime: '',
+  orderTime: new Date().toISOString().split('T')[0],
+  arrivalTime: '',
+  remark: '',
+  purchaseOrderItem: []
 }
 
 export default {
@@ -308,7 +308,7 @@ export default {
     isEditMode() {
       return !!this.$route.params.id
     },
-    // 仅显示数量>0的明细（过滤无效数据）
+    // 仅显示数量大于0的明细
     showPurchaseItems() {
       return this.allPurchaseItems.filter(item => item.qty > 0)
     }
@@ -339,7 +339,7 @@ export default {
         this.productLoading = false
       }
     },
-    // 商品选择下拉框输入搜索（实时过滤）
+    // 商品下拉输入搜索过滤
     handleProductSelectVisible(visible) {
       const input = document.querySelector('.el-select__input')
       if (visible && input) {
@@ -372,30 +372,30 @@ export default {
       )
       this.isProductExist = has
     },
-    // 打开SKU选择弹窗
+    // 打开 SKU 选择弹窗
     openSkuDialog() {
       if (!this.selectedProductId) {
         this.$message.warning('请先选择商品')
         return
       }
-      // 提取当前商品的所有明细（含数量0，确保编辑时不丢失数据）
+      // 提取当前商品的所有明细（含数量），确保编辑时不丢失数据
       this.existingSkuData = this.allPurchaseItems.filter(
         item => item.productId === this.selectedProductId
       )
       this.showSkuDialog = true
     },
-    // 关闭SKU弹窗
+    // 关闭 SKU 弹窗
     handleDialogClose() {
       this.showSkuDialog = false
       this.existingSkuData = []
     },
-    // 确认选择SKU（覆盖原有明细）
+    // 确认选择 SKU（覆盖原有明细）
     handleSkuConfirm(list) {
       // 删除当前商品的旧明细（避免重复）
       this.allPurchaseItems = this.allPurchaseItems.filter(
         item => item.productId !== this.selectedProductId
       )
-      // 添加新明细（含数量0，由父组件过滤显示）
+      // 添加新明细（含数量，由父组件过滤显示）
       this.allPurchaseItems = this.allPurchaseItems.concat(list)
       // 更新采购单明细（仅同步数量>0的有效数据）
       this.purchaseForm.purchaseOrderItem = this.showPurchaseItems
@@ -421,7 +421,7 @@ export default {
         this.supplierLoading = false
       }
     },
-    // 搜索供应商（远程搜索）
+    // 搜索供应商
     searchSupplier(key) {
       this.getSupplierList(key)
     },
@@ -466,10 +466,10 @@ export default {
     submitForm() {
       this.$refs.purchaseForm.validate(valid => {
         if (!valid) return
-        // 直接使用驼峰格式提交，与后端DTO一致
+        // 直接使用驼峰格式提交，与后端 DTO 一致
         const submitData = { ...this.purchaseForm }
 
-        // 校验明细有效性（单价≥0，数量≥1，避免无效数据提交）
+        // 校验明细有效性（单价>=0，数量>=1，避免无效数据提交）
         const validItems = submitData.purchaseOrderItem.every(item =>
           item.price >= 0 && item.qty >= 1 && !isNaN(item.price) && !isNaN(item.qty)
         )
@@ -506,12 +506,12 @@ export default {
     cancelForm() {
       this.$router.back()
     },
-    // 单价输入实时校验（过滤非数字+限制小数位）
+    // 单价输入实时校验（过滤非数字 + 限制小数位）
     handlePriceInput(row) {
       if (row.price === '' || row.price === null) return
       // 仅保留数字和单个小数点
       row.price = row.price.toString().replace(/[^\d.]/g, '').replace(/\.{2,}/g, '.')
-      // 限制小数点后最多2位
+      // 限制小数点后最多两位
       const dotIndex = row.price.indexOf('.')
       if (dotIndex > -1) {
         row.price = row.price.substring(0, dotIndex + 3)
@@ -520,7 +520,7 @@ export default {
       row.amount = Number((Number(row.price) * Number(row.qty || 0)).toFixed(2))
       this.computeTotal()
     },
-    // 单价失焦校验（补0+格式修正）
+    // 单价失焦校验（补0 + 格式修正）
     handlePriceBlur(row) {
       if (!row.price || row.price === '' || isNaN(Number(row.price))) {
         row.price = 0.00
@@ -539,7 +539,7 @@ export default {
       row.amount = Number((Number(row.price || 0) * Number(row.qty || 0)).toFixed(2))
       this.computeTotal()
     },
-    // 数量失焦校验（补0+格式修正）
+    // 数量失焦校验（补0 + 格式修正）
     handleQtyBlur(row) {
       if (!row.qty || row.qty === '' || isNaN(Number(row.qty)) || Number(row.qty) < 0) {
         row.qty = 0
@@ -573,3 +573,4 @@ export default {
   text-align: center;
 }
 </style>
+

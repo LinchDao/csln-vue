@@ -27,7 +27,7 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <el-row style="margin-top: 15px;">
+      <el-row class="template-filter-row">
         <el-col :span="8">
           <el-form-item label="仓库名称">
             <el-select v-model="queryParams.warehouseId" placeholder="请选择仓库" clearable>
@@ -42,7 +42,7 @@
         </el-col>
 
         <el-col :span="16">
-          <el-form-item>
+          <el-form-item class="template-action-group">
             <el-button
               v-waves
               type="primary"
@@ -54,7 +54,7 @@
             <el-button
               v-waves
               icon="el-icon-refresh"
-              style="margin-left: 10px;"
+              class="template-btn-gap"
               @click="handleReset"
             >
               重置
@@ -64,7 +64,7 @@
               :loading="downloadLoading"
               type="success"
               icon="el-icon-download"
-              style="margin-left: 10px;"
+              class="template-btn-gap"
               @click="handleDownload"
             >
               导出Excel
@@ -75,7 +75,7 @@
     </el-form>
 
     <!-- 列表 -->
-    <el-table v-loading="loading" :data="list" border style="width:100%;margin-top:10px;">
+    <el-table v-loading="loading" :data="list" border class="template-table-section" style="width: 100%; margin-top: 16px;">
       <el-table-column label="行号" type="index" align="center" width="80" />
       <el-table-column label="入库单号" align="center" width="180">
         <template slot-scope="scope">
