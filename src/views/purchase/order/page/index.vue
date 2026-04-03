@@ -71,6 +71,7 @@
       </el-row>
     </el-form>
 
+    <!-- 订单列表表格 -->
     <el-table v-loading="loading" :data="list" border style="width:100%;margin-top:10px;">
       <el-table-column label="行号" type="index" align="center" width="80" />
       <el-table-column label="采购单号" align="center" width="160">
@@ -87,7 +88,7 @@
       <el-table-column label="总数量" prop="totalQty" align="center" />
       <el-table-column label="总金额" align="center">
         <template slot-scope="scope">
-          ¥{{ scope.row.totalAmount }}
+          ¥{{ (scope.row.totalAmount || 0).toFixed(2) }}
         </template>
       </el-table-column>
       <el-table-column label="状态" prop="status" align="center" width="120" :formatter="formatStatus" />
@@ -96,8 +97,25 @@
       <el-table-column label="到货时间" prop="arrivalTime" align="center" width="180" />
       <el-table-column label="备注" prop="remark" align="center" />
       <el-table-column label="操作" align="center" width="160">
-        <el-button type="primary" size="mini" @click="handleEdit">编辑</el-button>
-        <el-button type="danger" size="mini" @click="handleCancel">取消</el-button>
+        <template slot-scope="scope">
+          <el-button
+            type="primary"
+            size="mini"
+            :disabled="[1, 2, 3].includes(scope.row.status)"
+            @click="handleEdit(scope.row)"
+          >
+            编辑
+          </el-button>
+          <el-button
+            type="danger"
+            size="mini"
+            style="margin-left: 8px;"
+            :disabled="[1, 2, 3].includes(scope.row.status)"
+            @click="handleCancel(scope.row)"
+          >
+            取消
+          </el-button>
+        </template>
       </el-table-column>
     </el-table>
 
@@ -134,8 +152,7 @@ export default {
       list: [],
       loading: false,
       downloadLoading: false,
-      purchaseOrderStatusOptions: [],
-      currentRow: {}
+      purchaseOrderStatusOptions: []
     }
   },
   created() {
@@ -143,9 +160,12 @@ export default {
     this.getList()
   },
   methods: {
+    // 初始化字典（订单状态）
     async initDict() {
-      this.purchaseOrderStatusOptions = this.$store.getters['dict/getPurchaseOrderStatus']
+      this.purchaseOrderStatusOptions = this.$store.getters['dict/getPurchaseOrderStatus'] || []
     },
+
+    // 获取订单列表数据
     async getList() {
       this.loading = true
       try {
@@ -157,15 +177,20 @@ export default {
         this.list = res.data.rows || []
         this.total = res.data.total || 0
       } catch (e) {
-        this.$message.error('查询失败')
+        this.$message.error('查询采购订单列表失败')
+        console.error('列表查询异常：', e)
       } finally {
         this.loading = false
       }
     },
+
+    // 搜索查询
     handleFilter() {
       this.queryParams.page = 1
       this.getList()
     },
+
+    // 重置查询条件
     handleReset() {
       this.queryParams = {
         purchaseNo: undefined,
@@ -176,39 +201,73 @@ export default {
       }
       this.getList()
     },
+
+    // 新增采购单
     handleCreate() {
       this.$router.push({ path: '/purchase/order/create' })
     },
+
+    // 导出Excel
     handleDownload() {
-      console.log('导出Excel')
+      console.log('导出采购订单Excel')
+      // 可补充导出逻辑：
+      // this.downloadLoading = true
+      // request({ url: '/api/purchase/order/export', method: 'get', responseType: 'blob' })
+      //   .then(res => { /* 处理文件下载 */ })
+      //   .finally(() => { this.downloadLoading = false })
     },
+
+    // 格式化订单状态显示
     formatStatus(row) {
-      this.currentRow = row
-      const target = parseInt(row.status)
-      const item = this.purchaseOrderStatusOptions.find(i => parseInt(i.dictValue) === target)
-      return item ? item.dictName : '未知'
+      const targetStatus = parseInt(row.status)
+      const statusItem = this.purchaseOrderStatusOptions.find(
+        item => parseInt(item.dictValue) === targetStatus
+      )
+      return statusItem ? statusItem.dictName : '未知状态'
     },
-    handleEdit() {
-      this.$router.push({ path: `/purchase/order/edit/${this.currentRow.id}` })
+
+    // 编辑订单（跳转对应行编辑页）
+    handleEdit(row) {
+      if (!row || !row.id) {
+        this.$message.warning('订单ID不存在，无法编辑')
+        return
+      }
+      this.$router.push({ path: `/purchase/order/edit/${row.id}` })
     },
-    handleCancel() {
-      const id = this.currentRow.id
-      this.$confirm('确定要取消该采购单吗？', '提示', {
-        type: 'warning'
-      }).then(() => {
-        request({
-          url: `/api/purchase/order/cancel/${id}`,
-          method: 'post'
-        }).then(res => {
-          this.$message.success('取消成功')
+
+    // 取消订单
+    handleCancel(row) {
+      if (!row || !row.id) {
+        this.$message.warning('订单ID不存在，无法取消')
+        return
+      }
+      this.$confirm('确定要取消该采购单吗？取消后可能无法恢复，请谨慎操作！', '警告', {
+        type: 'warning',
+        confirmButtonText: '确定取消',
+        cancelButtonText: '取消操作'
+      }).then(async() => {
+        try {
+          await request({
+            url: `/api/purchase/order/cancel/${row.id}`,
+            method: 'post'
+          })
+          this.$message.success('采购单取消成功')
           this.getList() // 刷新列表
-        })
+        } catch (e) {
+          this.$message.error('取消采购单失败')
+          console.error('订单取消异常：', e)
+        }
       }).catch(() => {
-        this.$message.info('已取消操作')
+        this.$message.info('已取消操作，采购单保持原状态')
       })
     },
+
+    // 查看订单详情
     handleDetail(row) {
-      this.currentRow = row
+      if (!row || !row.id) {
+        this.$message.warning('订单ID不存在，无法查看详情')
+        return
+      }
       this.$router.push({ path: `/purchase/order/detail/${row.id}` })
     }
   }
@@ -218,5 +277,45 @@ export default {
 <style scoped>
 .purchase-order-page {
   background: transparent;
+  padding: 0 20px;
+}
+
+.template-section {
+  background: #fff;
+  padding: 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.template-section__title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.template-operate-bar--center {
+  display: flex;
+  justify-content: center;
+}
+
+/* 按钮间距优化 */
+.el-button + .el-button {
+  margin-left: 10px !important;
+}
+
+/* 表格操作列按钮间距 */
+.el-table-column__content .el-button + .el-button {
+  margin-left: 8px !important;
+}
+
+/* 金额显示样式优化 */
+.el-table .el-link {
+  color: #1890ff;
+  cursor: pointer;
+}
+.el-table .el-link:hover {
+  color: #40a9ff;
+  text-decoration: underline;
 }
 </style>

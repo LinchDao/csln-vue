@@ -255,7 +255,6 @@ export default {
   methods: {
     // 通用方法：根据字典列表和dictValue获取dictName
     getDictLabel(dictList, dictValue) {
-      console.log(dictList)
       if (dictValue === null || dictValue === undefined || dictValue === '') return '未知'
       const val = Number(dictValue)
       const item = dictList.find(item => Number(item.dictValue) === val)

@@ -40,40 +40,36 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="16" />
-      </el-row>
-      <el-row style="margin-top: 15px;">
-        <el-col :span="24">
-          <div class="template-operate-bar template-operate-bar--center">
-            <el-form-item>
-              <el-button
-                v-waves
-                type="primary"
-                icon="el-icon-search"
-                @click="handleFilter"
-              >
-                查询
-              </el-button>
-              <el-button
-                v-waves
-                icon="el-icon-refresh"
-                style="margin-left: 10px;"
-                @click="handleReset"
-              >
-                重置
-              </el-button>
-              <el-button
-                v-waves
-                :loading="downloadLoading"
-                type="success"
-                icon="el-icon-download"
-                style="margin-left: 10px;"
-                @click="handleDownload"
-              >
-                导出Excel
-              </el-button>
-            </el-form-item>
-          </div>
+
+        <el-col :span="16">
+          <el-form-item>
+            <el-button
+              v-waves
+              type="primary"
+              icon="el-icon-search"
+              @click="handleFilter"
+            >
+              查询
+            </el-button>
+            <el-button
+              v-waves
+              icon="el-icon-refresh"
+              style="margin-left: 10px;"
+              @click="handleReset"
+            >
+              重置
+            </el-button>
+            <el-button
+              v-waves
+              :loading="downloadLoading"
+              type="success"
+              icon="el-icon-download"
+              style="margin-left: 10px;"
+              @click="handleDownload"
+            >
+              导出Excel
+            </el-button>
+          </el-form-item>
         </el-col>
       </el-row>
     </el-form>

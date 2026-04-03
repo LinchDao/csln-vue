@@ -63,6 +63,7 @@ const actions = {
     await dispatch('loadDict', { dictKey: DICT_KEY.MASTER_ORDER_TYPE, convertToNumber: true })
     await dispatch('loadDict', { dictKey: DICT_KEY.DELIVERY_TYPE, convertToNumber: true })
     await dispatch('loadDict', { dictKey: DICT_KEY.MASTER_ORDER_STATUS, convertToNumber: true })
+    await dispatch('loadDict', { dictKey: DICT_KEY.SUB_ORDER_STATUS, convertToNumber: true })
   },
 
   // 清空某个字典缓存（编辑后用）
@@ -78,7 +79,8 @@ const getters = {
   getPurchaseInStatus: (state) => state.dictCache[DICT_KEY.PRUCHASE_IN_STATUS] || [],
   getMasterOrderTypes: (state) => state.dictCache[DICT_KEY.MASTER_ORDER_TYPE] || [],
   getDeliveryTypes: (state) => state.dictCache[DICT_KEY.DELIVERY_TYPE] || [],
-  getMasterOrderStatus: (state) => state.dictCache[DICT_KEY.MASTER_ORDER_STATUS] || []
+  getMasterOrderStatus: (state) => state.dictCache[DICT_KEY.MASTER_ORDER_STATUS] || [],
+  getSubOrderStatus: (state) => state.dictCache[DICT_KEY.SUB_ORDER_STATUS] || []
 }
 
 export default {
