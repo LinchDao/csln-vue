@@ -80,7 +80,8 @@ const getters = {
   getMasterOrderTypes: (state) => state.dictCache[DICT_KEY.MASTER_ORDER_TYPE] || [],
   getDeliveryTypes: (state) => state.dictCache[DICT_KEY.DELIVERY_TYPE] || [],
   getMasterOrderStatus: (state) => state.dictCache[DICT_KEY.MASTER_ORDER_STATUS] || [],
-  getSubOrderStatus: (state) => state.dictCache[DICT_KEY.SUB_ORDER_STATUS] || []
+  getSubOrderStatus: (state) => state.dictCache[DICT_KEY.SUB_ORDER_STATUS] || [],
+  getRoleList: (state) => state.dictCache[DICT_KEY.ROLE_LIST] || []
 }
 
 export default {
