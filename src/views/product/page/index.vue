@@ -132,7 +132,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="商品名称" min-width="200px">
+      <el-table-column label="商品名称" min-width="200px" align="center">
         <template slot-scope="{ row }">
           <span class="link-type" @click="handleUpdate(row)">{{ row.name }}</span>
         </template>
@@ -400,3 +400,18 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.template-filter-row {
+  margin-top: 15px;
+}
+
+.template-operate-bar--center {
+  display: flex;
+  justify-content: center;
+}
+
+.template-btn-gap {
+  margin-left: 10px;
+}
+</style>
