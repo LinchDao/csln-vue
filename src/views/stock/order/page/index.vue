@@ -147,24 +147,25 @@
           <span>{{ (listQuery.page - 1) * listQuery.limit + $index + 1 }}</span>
         </template>
       </el-table-column>
+      <!-- 子订单号 -->
+      <el-table-column label="订单号" prop="orderNo" align="center" width="160" />
       <!-- 主订单号 -->
       <el-table-column
         label="订单号"
         sortable="custom"
         align="center"
-        width="160"
+        width="200"
       >
         <template slot-scope="scope">
           <el-link
             type="primary"
             @click="handleDetail(scope.row)"
           >
-            {{ scope.row.orderNo }}
+            {{ scope.row.subOrderNo }}
           </el-link>
         </template>
       </el-table-column>
-      <!-- 子订单号 -->
-      <el-table-column label="子订单号" prop="subOrderNo" align="center" width="160" />
+
       <!-- 客户名称 -->
       <el-table-column label="客户名称" prop="customerName" align="center" min-width="150" />
       <!-- 制单人 -->
