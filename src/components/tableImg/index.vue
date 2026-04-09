@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import { get } from 'axios'
+import request from '@/utils/request'
 
 export default {
   name: 'TableImage',
@@ -91,44 +91,63 @@ export default {
       return `/erp-service/erp/file/download/${this.imageId}`
     }
   },
-  // 组件首次挂载时加载图片（仅加载一次）
-  mounted() {
-    this.loadImage()
+  watch: {
+    // 监听 imageId 变化，支持组件复用时的更新
+    imageId: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal) {
+          this.loadImage()
+        } else {
+          this.cleanup()
+        }
+      }
+    }
   },
-  beforeUnmount() {
-    // 清理Blob URL，避免内存泄漏
-    if (this.imageBlobUrl) {
-      URL.revokeObjectURL(this.imageBlobUrl)
-    }
-    // 取消未完成的请求
-    if (this.abortController) {
-      this.abortController.abort()
-    }
+  beforeDestroy() {
+    this.cleanup()
   },
   methods: {
-    // 加载图片（仅在mounted时执行一次）
-    async loadImage() {
-      // 无图片ID时直接返回
-      if (!this.imageId) {
-        return
+    // 清理资源
+    cleanup() {
+      if (this.imageBlobUrl) {
+        URL.revokeObjectURL(this.imageBlobUrl)
+        this.imageBlobUrl = ''
       }
+      if (this.abortController) {
+        this.abortController.abort()
+        this.abortController = null
+      }
+    },
+    // 加载图片
+    async loadImage() {
+      if (!this.imageId) return
+
+      // 先清理旧请求和 URL
+      this.cleanup()
 
       try {
-        // 创建取消控制器
         this.abortController = new AbortController()
 
         // 发起请求：以blob形式接收/download接口的文件流
-        const response = await get(this.downloadApiUrl, {
-          responseType: 'blob', // 关键：接收blob类型响应
-          signal: this.abortController.signal // 支持取消请求
+        const data = await request({
+          url: this.downloadApiUrl,
+          method: 'get',
+          responseType: 'blob',
+          signal: this.abortController.signal
         })
 
+        // 校验：如果后端报错返回了 JSON 包装在 Blob 中
+        if (data.type === 'application/json') {
+          throw new Error('Invalid image data (JSON error)')
+        }
+
         // 将blob转换为可预览的URL
-        this.imageBlobUrl = URL.createObjectURL(response.data)
+        this.imageBlobUrl = URL.createObjectURL(data)
       } catch (error) {
         // 忽略取消请求的错误
         if (error.name !== 'AbortError') {
-          console.error('图片加载失败：', error)
+          console.error(`图片 [${this.imageId}] 加载失败：`, error)
           this.imageBlobUrl = ''
         }
       }
@@ -139,14 +158,13 @@ export default {
     },
     // 打开全屏展示
     openFullScreen() {
+      if (!this.imageBlobUrl) return
       this.isFullScreen = true
-      // 阻止页面滚动
       document.body.style.overflow = 'hidden'
     },
     // 关闭全屏展示
     closeFullScreen() {
       this.isFullScreen = false
-      // 恢复页面滚动
       document.body.style.overflow = ''
     }
   }
@@ -165,12 +183,12 @@ export default {
 /* 可点击图片样式 */
 .clickable-image {
   border-radius: 4px;
-  cursor: pointer; /* 恢复点击指针 */
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .clickable-image:hover {
-  transform: scale(1.05); /* 恢复hover缩放，提示可点击 */
+  transform: scale(1.05);
 }
 
 /* 图片占位样式 */
@@ -221,6 +239,6 @@ export default {
 
 /* 全屏图片样式 */
 .fullscreen-img {
-  object-fit: contain; /* 自适应缩放，完整展示图片 */
+  object-fit: contain;
 }
 </style>

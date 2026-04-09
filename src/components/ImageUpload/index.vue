@@ -40,7 +40,8 @@ export default {
     return {
       fileList: [],
       previewVisible: false,
-      previewUrl: ''
+      previewUrl: '',
+      internalValue: [] // 用于追踪已经处理过的 ID
     }
   },
   computed: {
@@ -52,19 +53,93 @@ export default {
   watch: {
     value: {
       immediate: true,
-      handler(val) {
-        if (!val) {
-          this.fileList = []
+      async handler(val) {
+        if (!val || (Array.isArray(val) && val.length === 0)) {
+          this.clearFileList()
+          this.internalValue = []
           return
         }
-        const ids = Array.isArray(val) ? val : [val]
-        this.fileList = ids.map(id => ({
-          url: `/erp-service/erp/file/download/${id}`
-        }))
+
+        // 归一化为字符串数组进行比较
+        const newIds = (Array.isArray(val) ? val : [val]).map(id => String(id))
+
+        // 深度比较，避免重复渲染和请求
+        if (JSON.stringify(this.internalValue) === JSON.stringify(newIds)) {
+          return
+        }
+
+        this.internalValue = newIds
+        await this.syncFileList(newIds)
       }
     }
   },
+  beforeDestroy() {
+    this.clearFileList()
+  },
   methods: {
+    // 清理文件列表并释放 Blob URL
+    clearFileList() {
+      this.fileList.forEach(file => {
+        if (file.url && file.url.startsWith('blob:')) {
+          URL.revokeObjectURL(file.url)
+        }
+      })
+      this.fileList = []
+    },
+
+    // 同步文件列表（并行加载）
+    async syncFileList(ids) {
+      // 先清理旧的（可选，如果想平滑切换可以不清理，但这里为了简单直接清理）
+      const oldList = [...this.fileList]
+
+      const promises = ids.map(async(id) => {
+        // 查找是否已经存在（避免重复下载同一个 ID）
+        const existing = oldList.find(f => String(f.id) === String(id))
+        if (existing && existing.url.startsWith('blob:')) {
+          return existing
+        }
+
+        const downloadUrl = `/erp-service/erp/file/download/${id}`
+        try {
+          const data = await request({
+            url: downloadUrl,
+            method: 'get',
+            responseType: 'blob'
+          })
+
+          if (data.type === 'application/json') {
+            throw new Error('Invalid image data')
+          }
+
+          return {
+            id: id,
+            uid: id,
+            url: URL.createObjectURL(data),
+            name: `image-${id}`
+          }
+        } catch (e) {
+          console.error(`加载图片 [${id}] 失败:`, e)
+          return {
+            id: id,
+            uid: id,
+            url: '', // 加载失败
+            name: `error-${id}`
+          }
+        }
+      })
+
+      const newList = await Promise.all(promises)
+
+      // 清理不再需要的旧 Blob
+      oldList.forEach(oldFile => {
+        if (oldFile.url.startsWith('blob:') && !newList.some(n => n.url === oldFile.url)) {
+          URL.revokeObjectURL(oldFile.url)
+        }
+      })
+
+      this.fileList = newList
+    },
+
     beforeUpload(file) {
       const isImage = file.type.startsWith('image/')
       if (!isImage) {
@@ -100,6 +175,8 @@ export default {
 
         const fileId = res.data
         onSuccess()
+
+        // 更新父组件 value
         if (this.limit === 1) {
           this.$emit('input', fileId)
         } else {
@@ -120,14 +197,17 @@ export default {
       this.previewVisible = true
     },
 
-    handleRemove(file, fileList) {
-      if (this.limit === 1) {
-        this.$emit('input', '')
-      } else {
-        const currentIds = Array.isArray(this.value) ? [...this.value] : []
-        const index = this.fileList.findIndex(item => item.uid === file.uid)
-        if (index > -1) currentIds.splice(index, 1)
-        this.$emit('input', currentIds)
+    handleRemove(file) {
+      const currentIds = Array.isArray(this.value) ? [...this.value] : (this.value ? [this.value] : [])
+      const index = currentIds.findIndex(id => String(id) === String(file.id))
+
+      if (index > -1) {
+        if (this.limit === 1) {
+          this.$emit('input', '')
+        } else {
+          currentIds.splice(index, 1)
+          this.$emit('input', currentIds)
+        }
       }
     }
   }
