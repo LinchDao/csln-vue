@@ -276,7 +276,7 @@ export default {
       this.listLoading = true
       const query = { ...this.listQuery }
 
-      request({ url: '/api/product/page', method: 'post', data: query })
+      request({ url: '/erp-service/product/page', method: 'post', data: query })
         .then(res => {
           this.list = res.data.rows
           this.total = res.data.total
@@ -328,7 +328,7 @@ export default {
         type: 'warning'
       }).then(() => {
         const ids = this.selectedList.map(item => item.id)
-        request({ url: '/api/product/batchDelete', method: 'post', data: { ids }})
+        request({ url: '/erp-service/product/batchDelete', method: 'post', data: { ids }})
           .then(() => {
             this.$message.success('批量删除成功')
             this.getList()
@@ -356,7 +356,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        request({ url: `/api/product/delete/${row.id}`, method: 'delete' })
+        request({ url: `/erp-service/product/delete/${row.id}`, method: 'delete' })
           .then(() => {
             this.$message.success('删除成功')
             this.getList()
@@ -371,7 +371,7 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       request({
-        url: '/api/product/export',
+        url: '/erp-service/product/export',
         method: 'post',
         data: this.listQuery,
         responseType: 'blob'

@@ -145,7 +145,7 @@ export default {
       try {
         // request placeholder
         // const res = await request({
-        //   url: '/api/xxx/page',
+        //   url: '/erp-service/xxx/page',
         //   method: 'post',
         //   data: this.queryParams
         // })

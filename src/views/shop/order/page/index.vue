@@ -269,7 +269,7 @@ export default {
     getList() {
       this.listLoading = true
       const query = { ...this.listQuery }
-      request({ url: '/api/order/master/page', method: 'post', data: query })
+      request({ url: '/erp-service/order/master/page', method: 'post', data: query })
         .then(res => {
           this.list = res.data.rows
           this.total = res.data.total
@@ -318,7 +318,7 @@ export default {
         type: 'warning'
       }).then(() => {
         const ids = this.selectedList.map(item => item.id)
-        request({ url: '/api/order/batchDelete', method: 'post', data: { ids }})
+        request({ url: '/erp-service/order/batchDelete', method: 'post', data: { ids }})
           .then(() => {
             this.$message.success('批量删除成功')
             this.getList()
@@ -343,7 +343,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        request({ url: `/api/order/delete/${row.id}`, method: 'delete' })
+        request({ url: `/erp-service/order/delete/${row.id}`, method: 'delete' })
           .then(() => {
             this.$message.success('删除成功')
             this.getList()
@@ -357,7 +357,7 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       request({
-        url: '/api/order/export',
+        url: '/erp-service/order/export',
         method: 'post',
         data: this.listQuery,
         responseType: 'blob'

@@ -176,7 +176,7 @@ export default {
       this.loading = true
       try {
         const res = await request({
-          url: `/api/product/${id}`,
+          url: `/erp-service/product/${id}`,
           method: 'get'
         })
         const data = res.data

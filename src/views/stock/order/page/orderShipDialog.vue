@@ -113,7 +113,7 @@ export default {
         }
         // 调用发货接口
         request({
-          url: '/api/order/sub/ship',
+          url: '/erp-service/order/sub/ship',
           method: 'post',
           data: params
         }).then(() => {

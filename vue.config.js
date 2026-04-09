@@ -36,13 +36,12 @@ module.exports = {
       warnings: false,
       errors: true
     },
-    // before: require('./mock/mock-server.js')
     proxy: {
-      '/api': {
+      '/dev-api': {
         target: 'http://localhost:8000', // 改成你的实际后端地址
         changeOrigin: true,
         pathRewrite: {
-          '^/api': '/api'
+          '^/dev-api/erp-service': '/erp-service'
         }
       }
     }

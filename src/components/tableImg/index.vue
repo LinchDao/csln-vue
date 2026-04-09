@@ -88,7 +88,7 @@ export default {
     },
     // 完整的下载接口地址
     downloadApiUrl() {
-      return `/api/erp/file/download/${this.imageId}`
+      return `/erp-service/erp/file/download/${this.imageId}`
     }
   },
   // 组件首次挂载时加载图片（仅加载一次）

@@ -326,7 +326,7 @@ export default {
       this.productLoading = true
       try {
         const res = await request({
-          url: '/api/product/no/name/list',
+          url: '/erp-service/product/no/name/list',
           method: 'post'
         })
         this.productAllList = res.data || []
@@ -410,7 +410,7 @@ export default {
       this.supplierLoading = true
       try {
         const res = await request({
-          url: '/api/purchase/order/supplier/list',
+          url: '/erp-service/purchase/order/supplier/list',
           method: 'get'
         })
         this.supplierList = res.data || []
@@ -449,7 +449,7 @@ export default {
     async fetchPurchaseDetail(id) {
       try {
         const { data } = await request({
-          url: '/api/purchase/order/' + id,
+          url: '/erp-service/purchase/order/' + id,
           method: 'get'
         })
         this.purchaseForm = {
@@ -481,10 +481,10 @@ export default {
         this.loading = true
         let url, method
         if (this.isEditMode) {
-          url = '/api/purchase/order/' + this.purchaseForm.id
+          url = '/erp-service/purchase/order/' + this.purchaseForm.id
           method = 'put'
         } else {
-          url = '/api/purchase/order/create'
+          url = '/erp-service/purchase/order/create'
           method = 'post'
         }
 

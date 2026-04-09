@@ -178,7 +178,7 @@ export default {
       try {
         // 1. 获取入库单主信息+基础明细
         const detailRes = await request({
-          url: `/api/purchase/in/${this.inId}`,
+          url: `/erp-service/purchase/in/${this.inId}`,
           method: 'get'
         })
         this.purchaseDetail = detailRes.data || { purchaseInItem: [] }
@@ -186,7 +186,7 @@ export default {
         // 2. 采购单ID存在 && 有明细时，调用接口获取已入库数量
         if (purchaseId && purchaseInItem.length > 0) {
           const stockRes = await request({
-            url: `/api/purchase/in/instockedQty/${purchaseId}`,
+            url: `/erp-service/purchase/in/instockedQty/${purchaseId}`,
             method: 'get'
           })
           // 转换为 {skuId: 已入库数量} 映射，方便匹配
@@ -216,7 +216,7 @@ export default {
       }).then(async() => {
         try {
           await request({
-            url: `/api/purchase/in/audit/pass/${this.inId}`,
+            url: `/erp-service/purchase/in/audit/pass/${this.inId}`,
             method: 'put'
           })
           this.$message.success('审核通过成功')
@@ -237,7 +237,7 @@ export default {
       }).then(async() => {
         try {
           await request({
-            url: `/api/purchase/in/audit/reject/${this.inId}`,
+            url: `/erp-service/purchase/in/audit/reject/${this.inId}`,
             method: 'put'
           })
           this.$message.success('审核驳回成功')

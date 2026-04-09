@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function login(data) {
   return request({
-    url: '/api/login',
+    url: '/erp-service/login',
     method: 'post',
     data
   })
@@ -10,14 +10,14 @@ export function login(data) {
 
 export function getInfo() {
   return request({
-    url: '/api/user/info',
+    url: '/erp-service/user/info',
     method: 'get'
   })
 }
 
 export function logout() {
   return request({
-    url: '/api/logout',
+    url: '/erp-service/logout',
     method: 'post'
   })
 }

@@ -104,7 +104,7 @@ export default {
       this.loading = true
       try {
         const res = await request({
-          url: `/api/user/get/${this.userId}`,
+          url: `/erp-service/user/get/${this.userId}`,
           method: 'get'
         })
         if (res.code === 200 && res.data) {

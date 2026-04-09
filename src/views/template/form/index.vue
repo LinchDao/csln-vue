@@ -161,7 +161,7 @@ export default {
       try {
         // request placeholder
         // const { data } = await request({
-        //   url: `/api/xxx/${id}`,
+        //   url: `/erp-service/xxx/${id}`,
         //   method: 'get'
         // })
         // this.formData = data
@@ -186,7 +186,7 @@ export default {
         try {
           // request placeholder
           // const method = this.isEditMode ? 'put' : 'post'
-          // const url = this.isEditMode ? `/api/xxx/${this.formData.id}` : '/api/xxx/create'
+          // const url = this.isEditMode ? `/erp-service/xxx/${this.formData.id}` : '/erp-service/xxx/create'
           // await request({ url, method, data: this.formData })
           this.$message.success(this.isEditMode ? '保存成功' : '创建成功')
           this.$router.back()
@@ -233,3 +233,4 @@ export default {
   }
 }
 </style>
+/style>

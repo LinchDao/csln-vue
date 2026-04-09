@@ -109,7 +109,7 @@ export default {
         realName: this.searchForm.realName // 模糊查询关键词
       }
       request({
-        url: '/api/user/page',
+        url: '/erp-service/user/page',
         method: 'post',
         data: queryParam
       }).then(res => {

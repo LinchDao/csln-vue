@@ -170,7 +170,7 @@ export default {
       this.loading = true
       try {
         const res = await request({
-          url: '/api/purchase/order/page',
+          url: '/erp-service/purchase/order/page',
           method: 'post',
           data: this.queryParams
         })
@@ -212,7 +212,7 @@ export default {
       console.log('导出采购订单Excel')
       // 可补充导出逻辑：
       // this.downloadLoading = true
-      // request({ url: '/api/purchase/order/export', method: 'get', responseType: 'blob' })
+      // request({ url: '/erp-service/purchase/order/export', method: 'get', responseType: 'blob' })
       //   .then(res => { /* 处理文件下载 */ })
       //   .finally(() => { this.downloadLoading = false })
     },
@@ -248,7 +248,7 @@ export default {
       }).then(async() => {
         try {
           await request({
-            url: `/api/purchase/order/cancel/${row.id}`,
+            url: `/erp-service/purchase/order/cancel/${row.id}`,
             method: 'post'
           })
           this.$message.success('采购单取消成功')

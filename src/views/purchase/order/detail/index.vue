@@ -174,7 +174,7 @@ export default {
       this.loading = true
       try {
         const res = await request({
-          url: `/api/purchase/order/${this.purchaseId}`,
+          url: `/erp-service/purchase/order/${this.purchaseId}`,
           method: 'get'
         })
         this.purchaseDetail = res.data || { purchaseOrderItem: [] }

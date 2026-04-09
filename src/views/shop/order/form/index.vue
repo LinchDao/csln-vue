@@ -423,7 +423,7 @@ export default {
       if (this.customerList.length > 0) return // 避免重复请求
       try {
         const { data } = await request({
-          url: '/api/order/master/customer/list',
+          url: '/erp-service/order/master/customer/list',
           method: 'get'
         })
         this.customerList = data || [] // 接口返回格式：[{id, name, phone}, ...]
@@ -438,7 +438,7 @@ export default {
       if (this.warehouseList.length > 0) return // 避免重复请求
       try {
         const { data } = await request({
-          url: '/api/warehouse/list', // 仓库列表接口（行业通用规范）
+          url: '/erp-service/warehouse/list', // 仓库列表接口（行业通用规范）
           method: 'get'
         })
         this.warehouseList = data || []
@@ -453,7 +453,7 @@ export default {
       this.loading = true
       try {
         const { data } = await request({
-          url: `/api/order/master/${id}/detail`,
+          url: `/erp-service/order/master/${id}/detail`,
           method: 'get'
         })
         this.formData = data
@@ -492,7 +492,7 @@ export default {
       item.productSearchLoading = true
       try {
         const { data } = await request({
-          url: '/api/product/no/name/list',
+          url: '/erp-service/product/no/name/list',
           method: 'post',
           data: { productNo: query } // 传参格式：{productNo: 搜索关键词}
         })
@@ -533,7 +533,7 @@ export default {
       const item = items[itemIndex]
       try {
         const { data } = await request({
-          url: `/api/product/get/sku/by/${productId}`,
+          url: `/erp-service/product/get/sku/by/${productId}`,
           method: 'get'
         })
         item.skuOptions = data || [] // 存储SKU列表（含colorName、sizeName、id）
@@ -640,28 +640,28 @@ export default {
 
           // 场景1：编辑-正式单提交修改 → PUT /order/master/{id}
           if (type === 'formal') {
-            url = `/api/order/master/${orderId}`
+            url = `/erp-service/order/master/${orderId}`
             method = 'put'
             successMsg = '正式单修改提交成功'
             errorMsg = '正式单修改提交失败'
           } else if (type === 'draft') {
-            url = `/api/order/master/${orderId}/draft`
+            url = `/erp-service/order/master/${orderId}/draft`
             method = 'put'
             successMsg = '草稿保存成功'
             errorMsg = '草稿保存失败'
           } else if (type === 'submitDraft') {
-            url = `/api/order/master/${orderId}/submit`
+            url = `/erp-service/order/master/${orderId}/submit`
             method = 'post'
             successMsg = '草稿单提交成功'
             errorMsg = '草稿单提交失败'
           } else if (type === 'createDraft') {
-            url = '/api/order/master/create'
+            url = '/erp-service/order/master/create'
             method = 'post'
             this.formData.isDraft = 1
             successMsg = '新建草稿保存成功'
             errorMsg = '新建草稿保存失败'
           } else if (type === 'createFormal') {
-            url = '/api/order/master/create'
+            url = '/erp-service/order/master/create'
             method = 'post'
             this.formData.isDraft = 0
             successMsg = '订单提交成功'

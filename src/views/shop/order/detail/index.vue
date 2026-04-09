@@ -211,7 +211,7 @@ export default {
     async loadDetail(id) {
       try {
         const { data } = await request({
-          url: `/api/order/master/${id}/detail`,
+          url: `/erp-service/order/master/${id}/detail`,
           method: 'get'
         })
         this.formData = this.formatData(data)

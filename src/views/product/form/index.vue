@@ -428,7 +428,7 @@ export default {
       this.listLoading = true
       try {
         const res = await request({
-          url: `/api/product/${id}`,
+          url: `/erp-service/product/${id}`,
           method: 'get'
         })
 
@@ -502,10 +502,10 @@ export default {
           let url = ''
           let method = ''
           if (this.isEditMode) {
-            url = `/api/product/${this.productForm.id}`
+            url = `/erp-service/product/${this.productForm.id}`
             method = 'put'
           } else {
-            url = '/api/product/add'
+            url = '/erp-service/product/add'
             method = 'post'
           }
 

@@ -217,7 +217,7 @@ export default {
     async fetchWarehouseList() {
       try {
         const res = await request({
-          url: '/api/warehouse/list', // 后端仓库列表接口
+          url: '/erp-service/warehouse/list', // 后端仓库列表接口
           method: 'get'
         })
         this.warehouseList = res.data || []
@@ -248,13 +248,13 @@ export default {
     // 获取采购单详情
     fetchPurchaseDetail() {
       return request({
-        url: `/api/purchase/order/${this.purchaseId}`,
+        url: `/erp-service/purchase/order/${this.purchaseId}`,
         method: 'get'
       })
     },
     fetchInstockedQty() {
       return request({
-        url: `/api/purchase/in/instockedQty/${this.purchaseId}`,
+        url: `/erp-service/purchase/in/instockedQty/${this.purchaseId}`,
         method: 'get'
       })
     },
@@ -351,7 +351,7 @@ export default {
       try {
         // 调用后端入库接口
         await request({
-          url: '/api/purchase/in/create',
+          url: '/erp-service/purchase/in/create',
           method: 'post',
           data: instockParams
         })

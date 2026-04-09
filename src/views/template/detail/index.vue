@@ -101,7 +101,7 @@ export default {
       try {
         // request placeholder
         // const { data } = await request({
-        //   url: `/api/xxx/${id}`,
+        //   url: `/erp-service/xxx/${id}`,
         //   method: 'get'
         // })
         // this.detailData = data

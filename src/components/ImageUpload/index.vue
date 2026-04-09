@@ -59,7 +59,7 @@ export default {
         }
         const ids = Array.isArray(val) ? val : [val]
         this.fileList = ids.map(id => ({
-          url: `/api/erp/file/download/${id}`
+          url: `/erp-service/erp/file/download/${id}`
         }))
       }
     }
@@ -90,7 +90,7 @@ export default {
         formData.append('file', file)
 
         const res = await request({
-          url: '/api/erp/file/upload',
+          url: '/erp-service/erp/file/upload',
           method: 'post',
           data: formData,
           headers: {

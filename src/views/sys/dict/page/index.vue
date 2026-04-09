@@ -214,7 +214,7 @@ export default {
     getList() {
       this.listLoading = true
       request({
-        url: '/api/dict/page',
+        url: '/erp-service/dict/page',
         method: 'post',
         data: this.listQuery
       }).then(res => {
@@ -261,7 +261,7 @@ export default {
         type: 'warning'
       }).then(() => {
         request({
-          url: `/api/dict/delete/${row.id}`,
+          url: `/erp-service/dict/delete/${row.id}`,
           method: 'delete'
         }).then(() => {
           this.$message.success('删除成功')
@@ -279,7 +279,7 @@ export default {
       }).then(() => {
         const ids = this.selectedList.map(item => item.id)
         request({
-          url: '/api/dict/batchDelete',
+          url: '/erp-service/dict/batchDelete',
           method: 'post',
           data: ids
         }).then(() => {

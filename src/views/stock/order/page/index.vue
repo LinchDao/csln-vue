@@ -360,7 +360,7 @@ export default {
         sortOrder: this.listQuery.sortOrder
       }
       request({
-        url: '/api/order/sub/page',
+        url: '/erp-service/order/sub/page',
         method: 'post',
         data: queryParam
       }).then(res => {
@@ -426,7 +426,7 @@ export default {
       }).then(() => {
         const ids = this.selectedList.map(item => item.id)
         request({
-          url: '/api/order/sub/batchDelete',
+          url: '/erp-service/order/sub/batchDelete',
           method: 'post',
           data: { ids }
         }).then(res => {
@@ -454,7 +454,7 @@ export default {
         type: 'warning'
       }).then(() => {
         request({
-          url: `/api/order/sub/delete/${row.id}`,
+          url: `/erp-service/order/sub/delete/${row.id}`,
           method: 'delete'
         }).then(res => {
           this.$message.success('删除成功')
@@ -470,7 +470,7 @@ export default {
       this.downloadLoading = true
       const exportParam = { ...this.listQuery }
       request({
-        url: '/api/order/sub/export',
+        url: '/erp-service/order/sub/export',
         method: 'post',
         data: exportParam,
         responseType: 'blob'
@@ -499,7 +499,7 @@ export default {
     handleUserSelectConfirm(selectedUserId) {
       this.userSelectVisible = false
       request({
-        url: '/api/order/sub/assign',
+        url: '/erp-service/order/sub/assign',
         method: 'post',
         data: {
           orderSubId: this.currentAssignRow.id,
@@ -523,7 +523,7 @@ export default {
         type: 'info'
       }).then(() => {
         request({
-          url: '/api/order/sub/picking/complete',
+          url: '/erp-service/order/sub/picking/complete',
           method: 'post',
           data: { orderSubId: row.id }
         }).then(() => {

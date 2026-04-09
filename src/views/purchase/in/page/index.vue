@@ -149,7 +149,7 @@ export default {
     async initWarehouseList() {
       try {
         const res = await request({
-          url: '/api/warehouse/list',
+          url: '/erp-service/warehouse/list',
           method: 'get'
         })
         this.warehouseList = res.data || []
@@ -161,7 +161,7 @@ export default {
       this.loading = true
       try {
         const res = await request({
-          url: '/api/purchase/in/page',
+          url: '/erp-service/purchase/in/page',
           method: 'post',
           data: this.queryParams
         })
@@ -200,7 +200,7 @@ export default {
       this.downloadLoading = true
       try {
         request({
-          url: '/api/purchase/in/export',
+          url: '/erp-service/purchase/in/export',
           method: 'post',
           data: this.queryParams,
           responseType: 'blob'

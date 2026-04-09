@@ -180,7 +180,7 @@ export default {
     // 加载编辑数据
     async loadDictData() {
       try {
-        const res = await request({ url: `/api/dict/get/${this.id}`, method: 'get' })
+        const res = await request({ url: `/erp-service/dict/get/${this.id}`, method: 'get' })
         this.form = res.data
       } catch (e) {
         this.$message.error('加载失败')
@@ -193,9 +193,9 @@ export default {
       this.submitLoading = true
       try {
         if (this.type === 'add') {
-          await request({ url: '/api/dict/add', method: 'post', data: this.form })
+          await request({ url: '/erp-service/dict/add', method: 'post', data: this.form })
         } else {
-          await request({ url: '/api/dict/update', method: 'put', data: this.form })
+          await request({ url: '/erp-service/dict/update', method: 'put', data: this.form })
         }
         this.$message.success('保存成功')
         this.$emit('success')

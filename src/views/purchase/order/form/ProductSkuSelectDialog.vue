@@ -249,7 +249,7 @@ export default {
       this.loading = true
       try {
         const res = await request({
-          url: `/api/product/get/sku/by/${this.productId}`,
+          url: `/erp-service/product/get/sku/by/${this.productId}`,
           method: 'get'
         })
         // 初始化SKU数据：数量默认0（全驼峰）

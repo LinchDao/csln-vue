@@ -265,7 +265,7 @@ export default {
       try {
         this.loading = true
         const { data } = await request({
-          url: `/api/order/sub/${id}/detail`,
+          url: `/erp-service/order/sub/${id}/detail`,
           method: 'get'
         })
         // 格式化数据后赋值
@@ -345,7 +345,7 @@ export default {
       this.userSelectVisible = false
       // 调用后端子订单分配接口
       request({
-        url: '/api/order/sub/assign',
+        url: '/erp-service/order/sub/assign',
         method: 'post',
         data: {
           orderSubId: this.currentSubOrderId,
@@ -376,7 +376,7 @@ export default {
         type: 'info'
       }).then(() => {
         request({
-          url: '/api/order/sub/picking/complete',
+          url: '/erp-service/order/sub/picking/complete',
           method: 'post',
           data: { orderSubId: this.currentSubOrderId }
         }).then(() => {

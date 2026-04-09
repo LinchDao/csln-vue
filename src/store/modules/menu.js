@@ -7,7 +7,7 @@ export default {
   actions: {
     tree({ commit }) {
       return request({
-        url: '/api/menu/tree',
+        url: '/erp-service/menu/tree',
         method: 'get'
       })
     }

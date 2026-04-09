@@ -187,9 +187,9 @@ export default {
     async loadAllSelectList() {
       try {
         const [shopRes, warehouseRes, roleRes] = await Promise.all([
-          request({ url: '/api/shop/list', method: 'get' }),
-          request({ url: '/api/warehouse/list', method: 'get' }),
-          request({ url: '/api/role/list', method: 'get' })
+          request({ url: '/erp-service/shop/list', method: 'get' }),
+          request({ url: '/erp-service/warehouse/list', method: 'get' }),
+          request({ url: '/erp-service/role/list', method: 'get' })
         ])
         this.shopList = shopRes.data || []
         this.warehouseList = warehouseRes.data || []
@@ -225,7 +225,7 @@ export default {
       this.formLoading = true
       try {
         const res = await request({
-          url: `/api/user/get/${this.userId}`,
+          url: `/erp-service/user/get/${this.userId}`,
           method: 'get'
         })
         if (res.code === 200 && res.data) {
@@ -275,7 +275,7 @@ export default {
           : { ...this.form }
 
         const res = await request({
-          url: this.type === 'add' ? '/api/user/add' : '/api/user/update',
+          url: this.type === 'add' ? '/erp-service/user/add' : '/erp-service/user/update',
           method: this.type === 'add' ? 'post' : 'put',
           data: requestData
         })
@@ -305,3 +305,4 @@ export default {
   line-height: 1.8;
 }
 </style>
+/style>
