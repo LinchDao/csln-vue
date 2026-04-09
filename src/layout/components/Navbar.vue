@@ -13,21 +13,43 @@
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <router-link to="/">
             <el-dropdown-item>
-              Home
+              首页
+            </el-dropdown-item>
+            <el-dropdown-item divided @click.native="dialogVisible = true">
+              <span style="display:block;">修改密码</span>
             </el-dropdown-item>
           </router-link>
           <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/">
-            <el-dropdown-item>Github</el-dropdown-item>
+            <el-dropdown-item>github</el-dropdown-item>
           </a>
           <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/">
-            <el-dropdown-item>Docs</el-dropdown-item>
+            <el-dropdown-item>doc</el-dropdown-item>
           </a>
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">Log Out</span>
+            <span style="display:block;">登出账号</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
+
+    <!-- 修改密码弹窗 -->
+    <el-dialog title="修改密码" :visible.sync="dialogVisible" width="400px" @close="resetPwdForm">
+      <el-form ref="pwdForm" :model="pwdForm" :rules="pwdRules" label-width="100px">
+        <el-form-item label="原密码" prop="oldPassword">
+          <el-input v-model="pwdForm.oldPassword" type="password" show-password />
+        </el-form-item>
+        <el-form-item label="新密码" prop="newPassword">
+          <el-input v-model="pwdForm.newPassword" type="password" show-password />
+        </el-form-item>
+        <el-form-item label="确认密码" prop="confirmPassword">
+          <el-input v-model="pwdForm.confirmPassword" type="password" show-password />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" :loading="loading" @click="handleUpdatePwd">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -35,11 +57,41 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
+import request from '@/utils/request'
 
 export default {
   components: {
     Breadcrumb,
     Hamburger
+  },
+  data() {
+    const validateConfirmPwd = (rule, value, callback) => {
+      if (value !== this.pwdForm.newPassword) {
+        callback(new Error('两次输入的密码不一致'))
+      } else {
+        callback()
+      }
+    }
+    return {
+      dialogVisible: false,
+      loading: false,
+      pwdForm: {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      },
+      pwdRules: {
+        oldPassword: [{ required: true, message: '请输入原密码', trigger: 'blur' }],
+        newPassword: [
+          { required: true, message: '请输入新密码', trigger: 'blur' },
+          { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
+        ],
+        confirmPassword: [
+          { required: true, message: '请再次输入新密码', trigger: 'blur' },
+          { validator: validateConfirmPwd, trigger: 'blur' }
+        ]
+      }
+    }
   },
   computed: {
     ...mapGetters([
@@ -54,6 +106,35 @@ export default {
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    },
+    handleUpdatePwd() {
+      this.$refs.pwdForm.validate(valid => {
+        if (valid) {
+          this.loading = true
+          request({
+            url: '/erp-service/user/password',
+            method: 'put',
+            data: {
+              oldPassword: this.pwdForm.oldPassword,
+              newPassword: this.pwdForm.newPassword
+            }
+          }).then(() => {
+            this.$message.success('密码修改成功')
+            this.dialogVisible = false
+            this.loading = false
+          }).catch(() => {
+            this.loading = false
+          })
+        }
+      })
+    },
+    resetPwdForm() {
+      this.$refs.pwdForm.resetFields()
+      this.pwdForm = {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }
     }
   }
 }

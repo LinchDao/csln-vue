@@ -101,10 +101,11 @@
         </template>
       </el-table-column>
       <el-table-column label="创建时间" prop="createTime" min-width="180" />
-      <el-table-column label="操作" width="220" align="center">
+      <el-table-column label="操作" width="280" align="center">
         <template slot-scope="{ row }">
           <el-button type="text" @click="handleDetail(row)">详情</el-button>
           <el-button type="text" @click="handleUpdate(row)">编辑</el-button>
+          <el-button type="text" @click="handleResetPassword(row)">重置密码</el-button>
           <el-button type="text" :style="{color: row.status === 1 ? '#f56c6c' : '#67c23a'}" @click="handleChangeStatus(row)">
             {{ row.status === 1 ? '禁用' : '启用' }}
           </el-button>
@@ -180,7 +181,7 @@ export default {
       this.loading = true
       try {
         const res = await request({
-          url: '/api/user/page',
+          url: '/erp-service/user/page',
           method: 'post',
           data: this.queryParams
         })
@@ -245,6 +246,29 @@ export default {
       this.detailVisible = false
       this.currentUserId = ''
     },
+    // 重置用户密码
+    async handleResetPassword(row) {
+      try {
+        await this.$confirm(`确定要重置用户【${row.realName}】的密码吗？`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+        const res = await request({
+          url: `/erp-service/user/password/reset/${row.id}`,
+          method: 'put'
+        })
+        if (res.code === 200) {
+          this.$message.success('密码重置成功！')
+        } else {
+          this.$message.error(res.message || '密码重置失败')
+        }
+      } catch (error) {
+        if (error !== 'cancel') {
+          this.$message.error('密码重置失败！' + (error.response?.data?.message || error.message))
+        }
+      }
+    },
     // 切换用户状态（核心修改：PUT请求+新接口+新请求体）
     async handleChangeStatus(row) {
       const targetStatus = row.status === 1 ? 0 : 1 // 目标状态：启用→禁用(0)，禁用→启用(1)
@@ -255,9 +279,9 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         })
-        // 核心修改：PUT请求 + 接口地址 /api/user/status + 请求体 {userId, status}
+        // 核心修改：PUT请求 + 接口地址 /erp-service/user/status + 请求体 {userId, status}
         await request({
-          url: '/api/user/status',
+          url: '/erp-service/user/status',
           method: 'put', // 改为PUT请求
           data: {
             userId: row.id, // 字段名改为userId（匹配接口要求）
@@ -290,3 +314,4 @@ export default {
   }
 }
 </style>
+/style>
