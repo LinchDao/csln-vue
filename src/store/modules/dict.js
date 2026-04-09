@@ -29,7 +29,7 @@ const actions = {
 
     try {
       const res = await request({
-        url: `/api/dict/get/${dictKey}`,
+        url: `/erp-service/dict/get/${dictKey}`,
         method: 'get'
       })
       let list = res.data.dictList || []
@@ -64,6 +64,7 @@ const actions = {
     await dispatch('loadDict', { dictKey: DICT_KEY.DELIVERY_TYPE, convertToNumber: true })
     await dispatch('loadDict', { dictKey: DICT_KEY.MASTER_ORDER_STATUS, convertToNumber: true })
     await dispatch('loadDict', { dictKey: DICT_KEY.SUB_ORDER_STATUS, convertToNumber: true })
+    await dispatch('loadDict', { dictKey: DICT_KEY.CUSTOMER_LEVEL, convertToNumber: false })
   },
 
   // 清空某个字典缓存（编辑后用）
@@ -81,7 +82,8 @@ const getters = {
   getDeliveryTypes: (state) => state.dictCache[DICT_KEY.DELIVERY_TYPE] || [],
   getMasterOrderStatus: (state) => state.dictCache[DICT_KEY.MASTER_ORDER_STATUS] || [],
   getSubOrderStatus: (state) => state.dictCache[DICT_KEY.SUB_ORDER_STATUS] || [],
-  getRoleList: (state) => state.dictCache[DICT_KEY.ROLE_LIST] || []
+  getRoleList: (state) => state.dictCache[DICT_KEY.ROLE_LIST] || [],
+  getCustomerLevels: (state) => state.dictCache[DICT_KEY.CUSTOMER_LEVEL] || []
 }
 
 export default {
