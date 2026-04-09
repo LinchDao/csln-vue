@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie'
 
-const TokenKey = 'csln_token'
+export const TokenKey = 'csln-token'
 
 export function getToken() {
   return Cookies.get(TokenKey)
