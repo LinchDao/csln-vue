@@ -98,16 +98,6 @@
             >
               新增订单
             </el-button>
-            <el-button
-              v-waves
-              :loading="downloadLoading"
-              type="success"
-              icon="el-icon-download"
-              class="template-btn-gap"
-              @click="handleDownload"
-            >
-              导出Excel
-            </el-button>
           </el-form-item>
         </el-col>
       </el-row>
@@ -225,7 +215,6 @@ export default {
       list: [],
       total: 0,
       listLoading: true,
-      downloadLoading: false,
       selectedList: [], // 批量选择的行数据
       // 恢复isDraft参数（草稿状态筛选）
       listQuery: {
@@ -351,29 +340,6 @@ export default {
           .catch(() => {
             this.$message.error('删除失败')
           })
-      })
-    },
-    // 导出Excel 内联request，blob格式，完全复用商品列表逻辑
-    handleDownload() {
-      this.downloadLoading = true
-      request({
-        url: '/erp-service/order/export',
-        method: 'post',
-        data: this.listQuery,
-        responseType: 'blob'
-      }).then(res => {
-        const blob = new Blob([res])
-        const fileName = `订单列表_${new Date().getTime()}.xlsx`
-        const a = document.createElement('a')
-        a.href = URL.createObjectURL(blob)
-        a.download = fileName
-        a.click()
-        URL.revokeObjectURL(a.href)
-        this.downloadLoading = false
-        this.$message.success('导出成功')
-      }).catch(() => {
-        this.downloadLoading = false
-        this.$message.error('导出失败')
       })
     },
     // 排序样式类 完全复用商品列表逻辑

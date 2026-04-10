@@ -59,16 +59,6 @@
             >
               重置
             </el-button>
-            <el-button
-              v-waves
-              :loading="downloadLoading"
-              type="success"
-              icon="el-icon-download"
-              class="template-btn-gap"
-              @click="handleDownload"
-            >
-              导出Excel
-            </el-button>
           </el-form-item>
         </el-col>
       </el-row>
@@ -132,7 +122,6 @@ export default {
       total: 0,
       list: [],
       loading: false,
-      downloadLoading: false,
       purchaseInStatusOptions: [],
       warehouseList: []
     }
@@ -195,29 +184,6 @@ export default {
     },
     handleDetail(row) {
       this.$router.push({ path: `/stock/in/detail/${row.id}` })
-    },
-    handleDownload() {
-      this.downloadLoading = true
-      try {
-        request({
-          url: '/erp-service/purchase/in/export',
-          method: 'post',
-          data: this.queryParams,
-          responseType: 'blob'
-        }).then(res => {
-          const blob = new Blob([res.data])
-          const a = document.createElement('a')
-          a.href = URL.createObjectURL(blob)
-          a.download = `采购入库单_${new Date().getTime()}.xlsx`
-          a.click()
-          URL.revokeObjectURL(a.href)
-          this.$message.success('导出成功')
-        })
-      } catch (e) {
-        this.$message.error('导出失败')
-      } finally {
-        this.downloadLoading = false
-      }
     }
   }
 }

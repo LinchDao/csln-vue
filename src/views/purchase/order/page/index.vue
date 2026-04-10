@@ -55,16 +55,6 @@
               >
                 新增采购单
               </el-button>
-              <el-button
-                v-waves
-                :loading="downloadLoading"
-                type="success"
-                icon="el-icon-download"
-                class="template-btn-gap"
-                @click="handleDownload"
-              >
-                导出Excel
-              </el-button>
             </el-form-item>
           </div>
         </el-col>
@@ -84,7 +74,7 @@
           </el-link>
         </template>
       </el-table-column>
-      <el-table-column label="供应商名称" prop="supplierName" align="center" />
+      <el-table-column label="供应商名称" width="200" prop="supplierName" align="center" />
       <el-table-column label="总数量" prop="totalQty" align="center" />
       <el-table-column label="总金额" align="center">
         <template slot-scope="scope">
@@ -92,10 +82,10 @@
         </template>
       </el-table-column>
       <el-table-column label="状态" prop="status" align="center" width="120" :formatter="formatStatus" />
-      <el-table-column label="制单人" prop="createUserName" align="center" />
-      <el-table-column label="下单时间" prop="orderTime" align="center" width="180" />
-      <el-table-column label="到货时间" prop="arrivalTime" align="center" width="180" />
-      <el-table-column label="备注" prop="remark" align="center" />
+      <el-table-column label="制单人" prop="createUserName" width="120" align="center" />
+      <el-table-column label="下单时间" prop="orderTime" align="center" width="120" />
+      <el-table-column label="到货时间" prop="arrivalTime" align="center" width="120" />
+      <el-table-column label="备注" prop="remark" min-width="120" align="center" />
       <el-table-column label="操作" align="center" width="160">
         <template slot-scope="scope">
           <el-button
@@ -151,7 +141,6 @@ export default {
       total: 0,
       list: [],
       loading: false,
-      downloadLoading: false,
       purchaseOrderStatusOptions: []
     }
   },
@@ -205,16 +194,6 @@ export default {
     // 新增采购单
     handleCreate() {
       this.$router.push({ path: '/purchase/order/create' })
-    },
-
-    // 导出Excel
-    handleDownload() {
-      console.log('导出采购订单Excel')
-      // 可补充导出逻辑：
-      // this.downloadLoading = true
-      // request({ url: '/erp-service/purchase/order/export', method: 'get', responseType: 'blob' })
-      //   .then(res => { /* 处理文件下载 */ })
-      //   .finally(() => { this.downloadLoading = false })
     },
 
     // 格式化订单状态显示

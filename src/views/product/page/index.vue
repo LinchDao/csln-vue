@@ -367,7 +367,6 @@ export default {
       })
     },
 
-    // 导出Excel
     handleDownload() {
       this.downloadLoading = true
       request({
@@ -376,16 +375,16 @@ export default {
         data: this.listQuery,
         responseType: 'blob'
       }).then(res => {
-        const blob = new Blob([res])
         const fileName = `商品列表_${new Date().getTime()}.xlsx`
         const a = document.createElement('a')
-        a.href = URL.createObjectURL(blob)
+        a.href = URL.createObjectURL(res)
         a.download = fileName
         a.click()
         URL.revokeObjectURL(a.href)
         this.downloadLoading = false
         this.$message.success('导出成功')
-      }).catch(() => {
+      }).catch((error) => {
+        console.error('导出失败：', error)
         this.downloadLoading = false
         this.$message.error('导出失败')
       })

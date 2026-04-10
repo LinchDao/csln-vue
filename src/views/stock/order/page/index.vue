@@ -108,16 +108,6 @@
             >
               重置
             </el-button>
-            <el-button
-              v-waves
-              :loading="downloadLoading"
-              type="success"
-              icon="el-icon-download"
-              class="template-btn-gap"
-              @click="handleDownload"
-            >
-              导出Excel
-            </el-button>
           </div>
         </el-col>
       </el-row>
@@ -287,7 +277,6 @@ export default {
       list: [],
       total: 0,
       listLoading: false,
-      downloadLoading: false,
       selectedList: [],
       // 分页查询参数
       listQuery: {
@@ -463,31 +452,6 @@ export default {
           console.error('删除订单失败：', error)
           this.$message.error('删除订单失败，请重试')
         })
-      })
-    },
-    // 导出Excel（保留原有逻辑）
-    handleDownload() {
-      this.downloadLoading = true
-      const exportParam = { ...this.listQuery }
-      request({
-        url: '/erp-service/order/sub/export',
-        method: 'post',
-        data: exportParam,
-        responseType: 'blob'
-      }).then(res => {
-        const blob = new Blob([res])
-        const fileName = `子订单列表_${new Date().getTime()}.xlsx`
-        const a = document.createElement('a')
-        a.href = URL.createObjectURL(blob)
-        a.download = fileName
-        a.click()
-        URL.revokeObjectURL(a.href)
-        this.downloadLoading = false
-        this.$message.success('导出成功')
-      }).catch(error => {
-        console.error('导出订单列表失败：', error)
-        this.$message.error('导出订单列表失败，请重试')
-        this.downloadLoading = false
       })
     },
     // 打开人员分配弹窗
