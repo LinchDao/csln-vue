@@ -119,9 +119,10 @@ export default {
               newPassword: this.pwdForm.newPassword
             }
           }).then(() => {
-            this.$message.success('密码修改成功')
+            this.$message.success('密码修改成功，请重新登录')
             this.dialogVisible = false
             this.loading = false
+            this.logout()
           }).catch(() => {
             this.loading = false
           })
