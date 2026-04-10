@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="productForm-container template-form-container template-form-layout">
     <el-form
       ref="productForm"
@@ -132,6 +132,15 @@
             </el-form-item>
           </el-col>
 
+          <el-col :span="24">
+            <el-form-item label="商品主图：">
+              <ImageUpload
+                v-model="productForm.mainImageId"
+                :limit="1"
+              />
+            </el-form-item>
+          </el-col>
+
         </el-row>
         <el-row>
           <el-col :span="24">
@@ -247,6 +256,7 @@
 import Sticky from '@/components/Sticky'
 import ColorSelectDialog from './colordialog.vue'
 import TableImage from '@/components/tableImg'
+import ImageUpload from '@/components/ImageUpload'
 import request from '@/utils/request'
 
 // 表单默认值
@@ -263,13 +273,14 @@ const defaultForm = {
   retailPrice: '',
   status: '1',
   description: '',
+  mainImageId: '',
   sizeNameList: [],
   colorList: []
 }
 
 export default {
   name: 'ProductForm',
-  components: { Sticky, ColorSelectDialog, TableImage },
+  components: { Sticky, ColorSelectDialog, TableImage, ImageUpload },
   data() {
     const validateRequire = (rule, value, callback) => {
       if (!value) {
@@ -543,4 +554,3 @@ export default {
 ::v-deep .el-input-number, ::v-deep .el-date-editor { width: 100%; }
 ::v-deep .el-radio { margin-right: 20px; }
 </style>
-
