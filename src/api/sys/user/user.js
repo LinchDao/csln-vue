@@ -21,3 +21,11 @@ export function logout() {
     method: 'post'
   })
 }
+
+export function refreshToken(refreshToken) {
+  return request({
+    url: '/erp-service/auth/refresh',
+    method: 'post',
+    data: { refreshToken }
+  })
+}

@@ -1,10 +1,11 @@
 import { login, logout, getInfo } from '@/api/sys/user/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { getToken, setToken, removeToken, getRefreshToken, setRefreshToken, removeRefreshToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
 
 const getDefaultState = () => {
   return {
     token: getToken(),
+    refreshToken: getRefreshToken(),
     name: '',
     avatar: '',
     roles: [],
@@ -21,6 +22,9 @@ const mutations = {
   SET_TOKEN: (state, token) => {
     state.token = token
   },
+  SET_REFRESH_TOKEN: (state, token) => {
+    state.refreshToken = token
+  },
   SET_NAME: (state, name) => {
     state.name = name
   },
@@ -30,8 +34,8 @@ const mutations = {
   SET_ROLES: (state, roles) => {
     state.roles = roles
   },
-  SET_USERINFO: (state, roles) => {
-    state.userinfo = roles
+  SET_USERINFO: (state, info) => {
+    state.userinfo = info
   }
 }
 
@@ -42,8 +46,14 @@ const actions = {
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
         const { data } = response
-        commit('SET_TOKEN', data)
-        setToken(data)
+        // Backend returns LoginRespDTO: { accessToken, refreshToken, token, tokenType, expiresIn }
+        const accessToken = data.accessToken || data.token
+        const refreshToken = data.refreshToken
+
+        commit('SET_TOKEN', accessToken)
+        commit('SET_REFRESH_TOKEN', refreshToken)
+        setToken(accessToken)
+        setRefreshToken(refreshToken)
 
         resolve()
       }).catch(error => {
@@ -81,6 +91,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       logout(state.token).then(() => {
         removeToken()
+        removeRefreshToken()
         resetRouter()
         commit('RESET_STATE')
         resolve()
@@ -93,7 +104,8 @@ const actions = {
   // remove token
   resetToken({ commit }) {
     return new Promise(resolve => {
-      removeToken() // must remove  token  first
+      removeToken()
+      removeRefreshToken()
       commit('RESET_STATE')
       resolve()
     })
@@ -106,4 +118,3 @@ export default {
   mutations,
   actions
 }
-
