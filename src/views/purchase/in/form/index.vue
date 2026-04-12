@@ -202,18 +202,11 @@ export default {
     async initDict() {
       this.purchaseOrderStatusOptions = this.$store.getters['dict/getPurchaseOrderStatus']
     },
-    // 初始化仓库列表：假数据，后续替换为后端接口请求
-    initWarehouseList() {
-      // 假数据格式 [{id, warehouseName}]
-      this.warehouseList = [
-        { id: '1', warehouseName: '一号主仓库' },
-        { id: '2', warehouseName: '二号分仓库' },
-        { id: '3', warehouseName: '三号临时仓库' }
-      ]
-      // 后续替换为后端接口请求
-      // this.fetchWarehouseList()
+    // 初始化仓库列表：从后端接口加载
+    async initWarehouseList() {
+      await this.fetchWarehouseList()
     },
-    // 【预留】从后端拉取仓库列表
+    // 从后端拉取仓库列表
     async fetchWarehouseList() {
       try {
         const res = await request({
