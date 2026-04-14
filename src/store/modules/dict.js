@@ -1,5 +1,6 @@
 import request from '@/utils/request'
 import { DICT_KEY } from '@/utils/dict'
+import { getToken, TokenKey } from '@/utils/auth'
 
 const state = {
   dictCache: {}
@@ -75,6 +76,12 @@ function syncFetchDict(dictKey, convertToNumber) {
     const xhr = new XMLHttpRequest()
     // 同步请求接口（注意：这里使用的是基础URL，请确保与 request.js 一致）
     xhr.open('GET', `${process.env.VUE_APP_BASE_API}/erp-service/dict/get/${dictKey}`, false)
+    
+    const token = getToken()
+    if (token) {
+      xhr.setRequestHeader(TokenKey, token)
+    }
+    
     xhr.send()
 
     if (xhr.status === 200) {
