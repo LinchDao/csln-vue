@@ -22,7 +22,6 @@ const actions = {
    */
   async loadDict({ commit, state }, options) {
     const { dictKey, convertToNumber } = options
-    // 缓存存在则直接返回
     if (state.dictCache[dictKey]) {
       return state.dictCache[dictKey]
     }
@@ -34,7 +33,6 @@ const actions = {
       })
       let list = res.data.dictList || []
 
-      // 根据参数决定是否将dictValue转为数字
       if (convertToNumber) {
         list = list.map(item => ({
           ...item,
@@ -53,18 +51,16 @@ const actions = {
     }
   },
 
-  // 预加载所有常用字典（按需求为每个字典设置convertToNumber参数）
-  async loadAllDict({ dispatch }) {
-    // 格式：await dispatch('loadDict', { dictKey: 字典key, convertToNumber: true/false })
-    await dispatch('loadDict', { dictKey: DICT_KEY.SIZE, convertToNumber: false })
-    await dispatch('loadDict', { dictKey: DICT_KEY.COLOR, convertToNumber: false })
-    await dispatch('loadDict', { dictKey: DICT_KEY.PRUCHASE_ORDER_STATUS, convertToNumber: true })
-    await dispatch('loadDict', { dictKey: DICT_KEY.PRUCHASE_IN_STATUS, convertToNumber: true })
-    await dispatch('loadDict', { dictKey: DICT_KEY.MASTER_ORDER_TYPE, convertToNumber: true })
-    await dispatch('loadDict', { dictKey: DICT_KEY.DELIVERY_TYPE, convertToNumber: true })
-    await dispatch('loadDict', { dictKey: DICT_KEY.MASTER_ORDER_STATUS, convertToNumber: true })
-    await dispatch('loadDict', { dictKey: DICT_KEY.SUB_ORDER_STATUS, convertToNumber: true })
-    await dispatch('loadDict', { dictKey: DICT_KEY.CUSTOMER_LEVEL, convertToNumber: false })
+  loadAllDict({ dispatch }) {
+    dispatch('loadDict', { dictKey: DICT_KEY.SIZE, convertToNumber: false })
+    dispatch('loadDict', { dictKey: DICT_KEY.COLOR, convertToNumber: false })
+    dispatch('loadDict', { dictKey: DICT_KEY.PRUCHASE_ORDER_STATUS, convertToNumber: true })
+    dispatch('loadDict', { dictKey: DICT_KEY.PRUCHASE_IN_STATUS, convertToNumber: true })
+    dispatch('loadDict', { dictKey: DICT_KEY.MASTER_ORDER_TYPE, convertToNumber: true })
+    dispatch('loadDict', { dictKey: DICT_KEY.DELIVERY_TYPE, convertToNumber: true })
+    dispatch('loadDict', { dictKey: DICT_KEY.MASTER_ORDER_STATUS, convertToNumber: true })
+    dispatch('loadDict', { dictKey: DICT_KEY.SUB_ORDER_STATUS, convertToNumber: true })
+    dispatch('loadDict', { dictKey: DICT_KEY.CUSTOMER_LEVEL, convertToNumber: false })
   },
 
   // 清空某个字典缓存（编辑后用）
@@ -73,17 +69,53 @@ const actions = {
   }
 }
 
+
+function syncFetchDict(dictKey, convertToNumber) {
+  try {
+    const xhr = new XMLHttpRequest()
+    // 同步请求接口（注意：这里使用的是基础URL，请确保与 request.js 一致）
+    xhr.open('GET', `${process.env.VUE_APP_BASE_API}/erp-service/dict/get/${dictKey}`, false)
+    xhr.send()
+
+    if (xhr.status === 200) {
+      const res = JSON.parse(xhr.responseText)
+      let list = res.data.dictList || []
+      if (convertToNumber) {
+        list = list.map(item => ({
+          ...item,
+          dictValue: item.dictValue !== undefined && item.dictValue !== null ? Number(item.dictValue) : item.dictValue
+        }))
+      }
+      return list
+    }
+  } catch (e) {
+    console.error(`同步加载字典【${dictKey}】异常`, e)
+  }
+  return []
+}
+
 const getters = {
-  getSizeDict: (state) => state.dictCache[DICT_KEY.SIZE] || [],
-  getColorDict: (state) => state.dictCache[DICT_KEY.COLOR] || [],
-  getPurchaseOrderStatus: (state) => state.dictCache[DICT_KEY.PRUCHASE_ORDER_STATUS] || [],
-  getPurchaseInStatus: (state) => state.dictCache[DICT_KEY.PRUCHASE_IN_STATUS] || [],
-  getMasterOrderTypes: (state) => state.dictCache[DICT_KEY.MASTER_ORDER_TYPE] || [],
-  getDeliveryTypes: (state) => state.dictCache[DICT_KEY.DELIVERY_TYPE] || [],
-  getMasterOrderStatus: (state) => state.dictCache[DICT_KEY.MASTER_ORDER_STATUS] || [],
-  getSubOrderStatus: (state) => state.dictCache[DICT_KEY.SUB_ORDER_STATUS] || [],
-  getRoleList: (state) => state.dictCache[DICT_KEY.ROLE_LIST] || [],
-  getCustomerLevels: (state) => state.dictCache[DICT_KEY.CUSTOMER_LEVEL] || []
+  getDictFromCache: (state) => (dictKey, convertToNumber = false) => {
+    if (state.dictCache[dictKey] && state.dictCache[dictKey].length > 0) {
+      return state.dictCache[dictKey]
+    }
+    const list = syncFetchDict(dictKey, convertToNumber)
+    if (list && list.length > 0) {
+      state.dictCache[dictKey] = list
+    }
+    return list || []
+  },
+
+  getSizeDict: (state, getters) => getters.getDictFromCache(DICT_KEY.SIZE),
+  getColorDict: (state, getters) => getters.getDictFromCache(DICT_KEY.COLOR),
+  getPurchaseOrderStatus: (state, getters) => getters.getDictFromCache(DICT_KEY.PRUCHASE_ORDER_STATUS, true),
+  getPurchaseInStatus: (state, getters) => getters.getDictFromCache(DICT_KEY.PRUCHASE_IN_STATUS, true),
+  getMasterOrderTypes: (state, getters) => getters.getDictFromCache(DICT_KEY.MASTER_ORDER_TYPE, true),
+  getDeliveryTypes: (state, getters) => getters.getDictFromCache(DICT_KEY.DELIVERY_TYPE, true),
+  getMasterOrderStatus: (state, getters) => getters.getDictFromCache(DICT_KEY.MASTER_ORDER_STATUS, true),
+  getSubOrderStatus: (state, getters) => getters.getDictFromCache(DICT_KEY.SUB_ORDER_STATUS, true),
+  getRoleList: (state, getters) => getters.getDictFromCache(DICT_KEY.ROLE_LIST),
+  getCustomerLevels: (state, getters) => getters.getDictFromCache(DICT_KEY.CUSTOMER_LEVEL)
 }
 
 export default {
