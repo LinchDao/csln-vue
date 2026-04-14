@@ -423,7 +423,7 @@ export default {
       if (this.customerList.length > 0) return // 避免重复请求
       try {
         const { data } = await request({
-          url: '/erp-service/order/master/customer/list',
+          url: '/erp-service/customer/list',
           method: 'get'
         })
         this.customerList = data || [] // 接口返回格式：[{id, name, phone}, ...]

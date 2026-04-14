@@ -58,14 +58,15 @@
         />
       </el-form-item>
       <el-form-item label="分配权限" prop="permIds">
-        <el-checkbox-group v-model="form.permIds" style="max-height: 150px; overflow-y: auto; border: 1px solid #dcdfe6; border-radius: 4px; padding: 10px;">
-          <el-checkbox
-            v-for="perm in permList"
-            :key="perm.id"
-            :label="perm.id"
-            style="margin: 0 15px 10px 0;"
-          >{{ perm.permName }}</el-checkbox>
-        </el-checkbox-group>
+        <el-tree
+          ref="permTree"
+          :data="permissionTree"
+          :props="{ label: 'permName', children: 'children' }"
+          node-key="id"
+          show-checkbox
+          style="margin-top: 8px; max-height: 250px; overflow-y: auto; border: 1px solid #dcdfe6; border-radius: 4px; padding: 5px;"
+          @check="handlePermCheck"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -127,6 +128,35 @@ export default {
   computed: {
     modalTitle() {
       return this.type === 'add' ? '新增角色' : '编辑角色'
+    },
+    permissionTree() {
+      if (!this.permList || this.permList.length === 0) return []
+      const tree = []
+      const moduleMap = {}
+
+      this.permList.forEach(perm => {
+        const nameParts = perm.permName.split('-')
+        const moduleName = nameParts.length > 1 ? nameParts[0] : '其他'
+        const actionName = nameParts.length > 1 ? nameParts[1] : perm.permName
+
+        if (!moduleMap[moduleName]) {
+          moduleMap[moduleName] = {
+            id: `module:${moduleName}`,
+            permName: moduleName,
+            children: [],
+            isModule: true
+          }
+          tree.push(moduleMap[moduleName])
+        }
+
+        moduleMap[moduleName].children.push({
+          ...perm,
+          permName: actionName,
+          isModule: false
+        })
+      })
+
+      return tree
     }
   },
   async created() {
@@ -180,6 +210,7 @@ export default {
       this.$nextTick(() => {
         this.$refs.formRef?.resetFields()
         this.$refs.menuTree?.setCheckedKeys([])
+        this.$refs.permTree?.setCheckedKeys([])
         this.submitLoading = false
         this.form = {
           id: this.roleId || '',
@@ -190,6 +221,9 @@ export default {
           permIds: []
         }
       })
+    },
+    handlePermCheck(currentObj, treeStatus) {
+      this.form.permIds = treeStatus.checkedKeys.filter(id => !id.toString().startsWith('module:'))
     },
     async fetchRoleDetail() {
       this.formLoading = true
@@ -216,6 +250,10 @@ export default {
               })
               this.$refs.menuTree.setCheckedKeys(leafKeys)
             }
+            if (this.$refs.permTree) {
+              const realPermIds = this.form.permIds.filter(id => !id.toString().startsWith('module:'))
+              this.$refs.permTree.setCheckedKeys(realPermIds)
+            }
           })
         } else {
           this.$message.error(res.message || '获取角色详情失败')
@@ -234,6 +272,8 @@ export default {
     },
     handleClose() {
       this.$refs.formRef?.resetFields()
+      this.$refs.menuTree?.setCheckedKeys([])
+      this.$refs.permTree?.setCheckedKeys([])
       this.formLoading = false
       this.submitLoading = false
       this.$emit('close')
@@ -245,6 +285,11 @@ export default {
       // 更新选中和半选中的菜单IDs
       if (this.$refs.menuTree) {
         this.form.menuIds = this.$refs.menuTree.getCheckedKeys().concat(this.$refs.menuTree.getHalfCheckedKeys())
+      }
+
+      // 更新选中的权限IDs（排除模块节点）
+      if (this.$refs.permTree) {
+        this.form.permIds = this.$refs.permTree.getCheckedKeys().filter(id => !id.toString().startsWith('module:'))
       }
 
       this.submitLoading = true
