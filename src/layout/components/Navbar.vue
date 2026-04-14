@@ -7,7 +7,8 @@
     <div class="right-menu">
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
+          <!-- <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar"> -->
+           <img :src="defaultAvatar" class="user-avatar">
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
@@ -15,10 +16,10 @@
             <el-dropdown-item>
               首页
             </el-dropdown-item>
-            <el-dropdown-item divided @click.native="dialogVisible = true">
-              <span style="display:block;">修改密码</span>
-            </el-dropdown-item>
           </router-link>
+          <el-dropdown-item divided @click.native="dialogVisible = true">
+            <span style="display:block;">修改密码</span>
+          </el-dropdown-item>
           <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/">
             <el-dropdown-item>github</el-dropdown-item>
           </a>
@@ -55,6 +56,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import defaultAvatar from '@/assets/logo.jpg'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
 import request from '@/utils/request'
@@ -73,6 +75,7 @@ export default {
       }
     }
     return {
+      defaultAvatar,
       dialogVisible: false,
       loading: false,
       pwdForm: {

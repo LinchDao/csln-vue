@@ -242,6 +242,7 @@
     <ColorSelectDialog
       :visible.sync="showColorDialog"
       :edit-data="editColorRow"
+      :selected-color-names="productForm.colorList.map(c => c.colorName)"
       @confirm="handleColorConfirm"
     />
 
@@ -426,7 +427,7 @@ export default {
       }
 
       this.$confirm('确定删除该颜色吗？', '提示', { type: 'warning' }).then(() => {
-        this.productForm.colorList = this.productForm.colorList.filter(i => i.id !== row.id)
+        this.productForm.colorList = this.productForm.colorList.filter(i => i.colorName !== row.colorName)
         this.$message.success('删除成功')
       })
     },

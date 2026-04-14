@@ -496,11 +496,12 @@ export default {
           method: 'post',
           data: { productNo: query } // 传参格式：{productNo: 搜索关键词}
         })
-        // 适配 ProductSelectDTO 字段（id→productId，name→productName）
+        // 适配 ProductSelectDTO 字段（id→productId，name→productName，wholesalePrice→wholesalePrice）
         item.productOptions = (data || []).map(product => ({
           productId: product.id, // 对应 DTO 的 id 字段
           productNo: product.productNo, // 对应 DTO 的 productNo 字段
-          productName: product.name // 对应 DTO 的 name 字段
+          productName: product.name, // 对应 DTO 的 name 字段
+          wholesalePrice: product.wholesalePrice // 自动回填批发价
         }))
       } catch (err) {
         this.$message.error('款号搜索失败')
@@ -519,12 +520,15 @@ export default {
         item.productId = productId // 存储商品ID（对应 DTO 的 id）
         item.productName = selectedProduct.productName // 回显商品名称（原goodsName）
         item.productNo = productId // 存储 productId 用于下拉回显（原styleNo）
+        item.price = selectedProduct.wholesalePrice || 0 // 自动填写单价为返回的批发价
         // 加载该商品对应的SKU列表
         await this.loadSkuList(productId, itemIndex, this.formData.subOrders[subIndex].items)
         // 重置颜色、尺码、skuId（字段名调整）
         item.colorName = ''
         item.sizeName = ''
         item.skuId = ''
+        // 重新计算单项金额
+        this.calcItemAmount(item, subIndex)
       }
     },
 
