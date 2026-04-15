@@ -36,8 +36,6 @@ router.beforeEach(async(to, from, next) => {
           )
           router.addRoutes(accessRoutes)
 
-          await store.dispatch('dict/loadAllDict')
-
           next({ ...to, replace: true })
         } catch (error) {
           await store.dispatch('user/resetToken')

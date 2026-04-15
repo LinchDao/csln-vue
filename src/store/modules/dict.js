@@ -52,18 +52,6 @@ const actions = {
     }
   },
 
-  loadAllDict({ dispatch }) {
-    dispatch('loadDict', { dictKey: DICT_KEY.SIZE, convertToNumber: false })
-    dispatch('loadDict', { dictKey: DICT_KEY.COLOR, convertToNumber: false })
-    dispatch('loadDict', { dictKey: DICT_KEY.PRUCHASE_ORDER_STATUS, convertToNumber: true })
-    dispatch('loadDict', { dictKey: DICT_KEY.PRUCHASE_IN_STATUS, convertToNumber: true })
-    dispatch('loadDict', { dictKey: DICT_KEY.MASTER_ORDER_TYPE, convertToNumber: true })
-    dispatch('loadDict', { dictKey: DICT_KEY.DELIVERY_TYPE, convertToNumber: true })
-    dispatch('loadDict', { dictKey: DICT_KEY.MASTER_ORDER_STATUS, convertToNumber: true })
-    dispatch('loadDict', { dictKey: DICT_KEY.SUB_ORDER_STATUS, convertToNumber: true })
-    dispatch('loadDict', { dictKey: DICT_KEY.CUSTOMER_LEVEL, convertToNumber: false })
-  },
-
   // 清空某个字典缓存（编辑后用）
   clearDict({ commit }, dictKey) {
     commit('SET_DICT', { key: dictKey, list: null })
