@@ -80,7 +80,7 @@ export default {
 <style lang="scss" scoped>
 .pdf-preview-container {
   width: 100%;
-  height: calc(100vh - 84px); // 减去顶栏和标签栏的高度（vue-admin-template 默认高度）
+  height: calc(100vh - 84px);
   background-color: #f0f2f5;
   display: flex;
   flex-direction: column;
