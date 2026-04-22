@@ -102,7 +102,7 @@
         label="ID"
         prop="id"
         align="center"
-        width="120"
+        width="200"
       >
         <template slot-scope="{ row }">
           <span>{{ row.id }}</span>

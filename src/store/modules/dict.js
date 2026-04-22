@@ -110,7 +110,9 @@ const getters = {
   getMasterOrderStatus: (state, getters) => getters.getDictFromCache(DICT_KEY.MASTER_ORDER_STATUS, true),
   getSubOrderStatus: (state, getters) => getters.getDictFromCache(DICT_KEY.SUB_ORDER_STATUS, true),
   getRoleList: (state, getters) => getters.getDictFromCache(DICT_KEY.ROLE_LIST),
-  getCustomerLevels: (state, getters) => getters.getDictFromCache(DICT_KEY.CUSTOMER_LEVEL)
+  getCustomerLevels: (state, getters) => getters.getDictFromCache(DICT_KEY.CUSTOMER_LEVEL),
+  getLogActionDict: (state, getters) => getters.getDictFromCache(DICT_KEY.LOG_ACTION),
+  getLogModuleDict: (state, getters) => getters.getDictFromCache(DICT_KEY.LOG_MODULE)
 }
 
 export default {
