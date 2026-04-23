@@ -43,6 +43,10 @@
 
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
     </el-form>
+
+    <div class="footer">
+      <a href="http://beian.miit.gov.cn/" target="_blank">粤ICP备2026047411号</a>
+    </div>
   </div>
 </template>
 
@@ -170,10 +174,11 @@ $dark_gray:#889aa4;
 $light_gray:#eee;
 
 .login-container {
-  min-height: 100%;
+  min-height: 100vh;
   width: 100%;
   background-color: $bg;
   overflow: hidden;
+  position: relative;
 
   .login-form {
     position: relative;
@@ -224,6 +229,29 @@ $light_gray:#eee;
     color: $dark_gray;
     cursor: pointer;
     user-select: none;
+  }
+
+  .footer {
+    position: fixed;
+    bottom: 30px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 18px;
+    letter-spacing: 1.2px;
+    z-index: 999;
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      transition: all 0.3s;
+
+      &:hover {
+        color: #fff;
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+      }
+    }
   }
 }
 </style>
