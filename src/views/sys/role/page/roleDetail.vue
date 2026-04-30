@@ -21,7 +21,7 @@
           <span class="detail-value" style="max-width: 500px;">{{ detailData.remark || '无' }}</span>
         </div>
       </el-card>
-      
+
       <el-card shadow="hover" class="detail-card mt-16">
         <h3 class="card-title">分配信息</h3>
         <div class="detail-row">

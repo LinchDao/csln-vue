@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <!-- 搜索栏 -->
-    <el-form :model="queryParams" ref="queryForm" :inline="true" label-width="68px">
+    <el-form ref="queryForm" :model="queryParams" :inline="true" label-width="68px">
       <el-form-item label="业务ID" prop="bizId">
         <el-input
           v-model="queryParams.bizId"
@@ -48,7 +48,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="['00:00:00', '23:59:59']"
-        ></el-date-picker>
+        />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -99,12 +99,12 @@
     <el-dialog :title="dialogTitle" :visible.sync="open" width="800px" append-to-body>
       <div v-if="diffData">
         <el-input
+          v-model="diffData"
           type="textarea"
           :rows="20"
           readonly
-          v-model="diffData"
           placeholder="暂无差异数据"
-        ></el-input>
+        />
       </div>
       <div v-else style="text-align: center; padding: 20px;">
         <span style="color: #909399;">暂无差异数据</span>
@@ -171,16 +171,16 @@ export default {
     parseTime,
     /** 查询日志列表 */
     getList() {
-      this.loading = true;
-      const params = { ...this.queryParams };
+      this.loading = true
+      const params = { ...this.queryParams }
 
       // 直接传数组，后端已改为 List<String> 接收
-      params.module = this.moduleList && this.moduleList.length > 0 ? this.moduleList : undefined;
-      params.actionType = this.actionTypeList && this.actionTypeList.length > 0 ? this.actionTypeList : undefined;
+      params.module = this.moduleList && this.moduleList.length > 0 ? this.moduleList : undefined
+      params.actionType = this.actionTypeList && this.actionTypeList.length > 0 ? this.actionTypeList : undefined
 
       if (this.dateRange && this.dateRange.length === 2) {
-        params.startTime = this.dateRange[0];
-        params.endTime = this.dateRange[1];
+        params.startTime = this.dateRange[0]
+        params.endTime = this.dateRange[1]
       }
 
       request({
@@ -188,24 +188,24 @@ export default {
         method: 'post',
         data: params
       }).then(response => {
-        const { rows, total } = response.data;
-        this.logList = rows || [];
-        this.total = total || 0;
-        this.loading = false;
+        const { rows, total } = response.data
+        this.logList = rows || []
+        this.total = total || 0
+        this.loading = false
       }).catch(() => {
-        this.loading = false;
-      });
+        this.loading = false
+      })
     },
     /** 搜索按钮操作 */
     handleQuery() {
-      this.queryParams.page = 1;
-      this.getList();
+      this.queryParams.page = 1
+      this.getList()
     },
     /** 重置按钮操作 */
     resetQuery() {
-      this.dateRange = [];
-      this.moduleList = [];
-      this.actionTypeList = [];
+      this.dateRange = []
+      this.moduleList = []
+      this.actionTypeList = []
       this.queryParams = {
         page: 1,
         limit: 10,
@@ -215,19 +215,19 @@ export default {
         startTime: undefined,
         endTime: undefined,
         bizId: undefined
-      };
-      this.handleQuery();
+      }
+      this.handleQuery()
     },
     /** 查看差异按钮操作 */
     handleViewDiff(row) {
-      this.diffData = '';
-      this.open = true;
+      this.diffData = ''
+      this.open = true
       request({
         url: `/erp-service/log/diff-data/${row.id}`,
         method: 'get'
       }).then(response => {
-        this.diffData = response.data;
-      });
+        this.diffData = response.data
+      })
     }
   }
 }
