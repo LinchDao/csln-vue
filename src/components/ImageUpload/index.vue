@@ -26,7 +26,10 @@ import request from '@/utils/request'
 export default {
   name: 'ImageUpload',
   props: {
-    value: [String, Number, Array],
+    value: {
+      type: [String, Number, Array],
+      default: ''
+    },
     // 限制上传数量
     // 1 = 单张
     // 0 = 不限制

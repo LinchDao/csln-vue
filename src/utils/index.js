@@ -155,3 +155,21 @@ export function debounce(func, wait, immediate) {
     return result
   }
 }
+
+/**
+ * 安全解析 JSON 字符串
+ * @param {string} str 待解析的 JSON 字符串
+ * @param {any} defaultVal 解析失败或字符串为空时的默认值
+ * @returns {any}
+ */
+export function safeJsonParse(str, defaultVal = {}) {
+  if (!str || typeof str !== 'string') {
+    return defaultVal
+  }
+  try {
+    return JSON.parse(str)
+  } catch (e) {
+    console.error('JSON parse error:', e)
+    return defaultVal
+  }
+}

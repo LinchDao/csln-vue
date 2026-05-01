@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="purchaseForm-container template-form-container template-form-layout">
     <el-form
       ref="purchaseForm"
@@ -47,6 +47,7 @@
                 :remote-method="searchSupplier"
                 :loading="supplierLoading"
                 style="width: 100%;"
+                @change="handleSupplierChange"
               >
                 <el-option
                   v-for="item in supplierList"
@@ -80,6 +81,7 @@
                 v-model="purchaseForm.orderTime"
                 type="date"
                 placeholder="选择下单时间"
+                value-format="yyyy-MM-dd"
                 style="width: 100%;"
               />
             </el-form-item>
@@ -90,6 +92,7 @@
                 v-model="purchaseForm.arrivalTime"
                 type="date"
                 placeholder="选择到货时间"
+                value-format="yyyy-MM-dd"
                 style="width: 100%;"
               />
             </el-form-item>
@@ -177,8 +180,11 @@
             >
               <el-table-column label="款号" prop="productNo" align="center" min-width="120" />
               <el-table-column label="商品名称" prop="productName" align="center" min-width="180" />
-              <el-table-column label="颜色" prop="colorName" align="center" width="100" />
-              <el-table-column label="尺码" prop="sizeName" align="center" width="100" />
+              <el-table-column label="规格" align="center" min-width="150">
+                <template slot-scope="scope">
+                  {{ formatSkuDims(scope.row) }}
+                </template>
+              </el-table-column>
               <el-table-column label="单价" prop="price" align="center" width="120">
                 <template slot-scope="scope">
                   <el-input
@@ -241,6 +247,7 @@
       :product-id="selectedProductId"
       :product-no="currentSelectProduct ? currentSelectProduct.productNo : ''"
       :product-name="currentSelectProduct ? currentSelectProduct.name : ''"
+      :cost-price="currentSelectProduct ? currentSelectProduct.costPrice : 0"
       :existing-sku-data="existingSkuData"
       @confirm="handleSkuConfirm"
       @close="handleDialogClose"
@@ -251,6 +258,7 @@
 <script>
 import Sticky from '@/components/Sticky'
 import request from '@/utils/request'
+import { safeJsonParse } from '@/utils'
 import ProductSkuSelectDialog from './ProductSkuSelectDialog'
 
 // 表单默认值（全驼峰命名，与后端 DTO 完全一致）
@@ -326,8 +334,9 @@ export default {
       this.productLoading = true
       try {
         const res = await request({
-          url: '/erp-service/product/no/name/list',
-          method: 'post'
+          url: '/erp-service/product/v2/select/list',
+          method: 'post',
+          data: {} // 兼容 ProductV2SelectQueryDTO
         })
         this.productAllList = res.data || []
         this.filterProductList = this.productAllList
@@ -425,6 +434,11 @@ export default {
     searchSupplier(key) {
       this.getSupplierList(key)
     },
+    // 选择供应商变化时同步名称
+    handleSupplierChange(id) {
+      const supplier = this.supplierList.find(item => item.id === id)
+      this.purchaseForm.supplierName = supplier ? supplier.name : ''
+    },
     // 删除采购明细
     deleteItem(row) {
       this.$confirm('确认删除该明细？', '提示', { type: 'warning' }).then(() => {
@@ -446,6 +460,25 @@ export default {
       this.purchaseForm.totalQty = qty
       this.purchaseForm.totalAmount = Number(amount.toFixed(2))
     },
+    // 格式化规格显示
+    formatSkuDims(row) {
+      let dims = []
+      // 1. 优先从快照中解析（适用于详情回显）
+      if (row.skuSpecSnapshot) {
+        const snapshot = safeJsonParse(row.skuSpecSnapshot)
+        dims = snapshot.dims || []
+      }
+      // 2. 如果快照没有解析出维度，尝试使用原始 dims（适用于新增时）
+      if ((!dims || dims.length === 0) && row.dims) {
+        dims = row.dims
+      }
+
+      if (dims && dims.length > 0) {
+        // 按照 order 排序确保顺序稳定
+        return [...dims].sort((a, b) => (a.order || 0) - (b.order || 0)).map(d => d.value).join(' / ')
+      }
+      return '-'
+    },
     async fetchPurchaseDetail(id) {
       try {
         const { data } = await request({
@@ -466,15 +499,37 @@ export default {
     submitForm() {
       this.$refs.purchaseForm.validate(valid => {
         if (!valid) return
-        // 直接使用驼峰格式提交，与后端 DTO 一致
-        const submitData = { ...this.purchaseForm }
 
-        // 校验明细有效性（单价>=0，数量>=1，避免无效数据提交）
-        const validItems = submitData.purchaseOrderItem.every(item =>
+        // 提交前确保明细是最新的（同步 showPurchaseItems）
+        const validItems = this.showPurchaseItems
+        if (validItems.length === 0) {
+          this.$message.error('请至少选择一个商品并输入数量')
+          return
+        }
+
+        // 构造提交数据
+        const submitData = {
+          ...this.purchaseForm,
+          purchaseOrderItem: validItems.map(item => ({
+            skuId: item.skuId,
+            skuSpecSnapshot: item.skuSpecSnapshot,
+            productId: item.productId,
+            productNo: item.productNo,
+            productName: item.productName,
+            price: Number(item.price),
+            qty: Number(item.qty),
+            amount: Number(item.amount)
+          })),
+          // 处理空日期
+          arrivalTime: this.purchaseForm.arrivalTime || null
+        }
+
+        // 再次校验明细数据的数值有效性
+        const isDataValid = submitData.purchaseOrderItem.every(item =>
           item.price >= 0 && item.qty >= 1 && !isNaN(item.price) && !isNaN(item.qty)
         )
-        if (!validItems) {
-          this.$message.error('采购明细中存在无效的单价/数量，请检查')
+        if (!isDataValid) {
+          this.$message.error('采购明细中存在无效的单价或数量')
           return
         }
 
@@ -491,7 +546,7 @@ export default {
         request({
           url: url,
           method: method,
-          data: submitData // 全驼峰数据直接提交
+          data: submitData
         }).then(() => {
           this.$message.success(this.isEditMode ? '修改成功' : '新增成功')
           this.$router.back()
@@ -573,4 +628,3 @@ export default {
   text-align: center;
 }
 </style>
-

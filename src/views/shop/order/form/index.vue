@@ -212,14 +212,15 @@
           border
           style="width: 100%; margin-top:10px;"
           show-summary
+          :span-method="(param) => handleItemSpanMethod(param, subIndex)"
           :summary-method="(param) => getSummary(param, subIndex)"
         >
           <el-table-column type="index" label="序号" width="80" align="center" />
           <el-table-column label="款号" min-width="180" align="center">
             <template slot-scope="{ row, $index }">
               <el-select
-                v-model="row.productNo"
-                placeholder="输入款号搜索"
+                v-model="row.productId"
+                placeholder="输入款号或名称搜索"
                 clearable
                 filterable
                 remote
@@ -242,42 +243,22 @@
               <el-input v-model="row.productName" disabled placeholder="请先选择款号" />
             </template>
           </el-table-column>
-          <el-table-column label="颜色" width="120" align="center">
-            <template slot-scope="{ row }">
-              <el-select
-                v-model="row.colorName"
-                placeholder="请先选择款号"
-                clearable
-                style="width:100%;"
+          <el-table-column label="选择规格" width="100" align="center">
+            <template slot-scope="{ row, $index }">
+              <el-button
+                type="primary"
+                size="mini"
+                icon="el-icon-plus"
                 :disabled="!row.productId"
-                @change="() => { matchSkuId(row); checkDuplicateSku(row, subIndex) }"
-              >
-                <el-option
-                  v-for="item in getUniqueColor(row.skuOptions)"
-                  :key="item.colorName"
-                  :label="item.colorName"
-                  :value="item.colorName"
-                />
-              </el-select>
+                @click="handleSelectSku(subIndex, $index)"
+              >选择</el-button>
             </template>
           </el-table-column>
-          <el-table-column label="尺码" width="120" align="center">
+          <el-table-column label="规格" min-width="120" align="center">
             <template slot-scope="{ row }">
-              <el-select
-                v-model="row.sizeName"
-                placeholder="请先选择颜色"
-                clearable
-                style="width:100%;"
-                :disabled="!row.colorName"
-                @change="() => { matchSkuId(row); checkDuplicateSku(row, subIndex) }"
-              >
-                <el-option
-                  v-for="item in filterSizeByColor(row.skuOptions, row.colorName)"
-                  :key="item.sizeName"
-                  :label="item.sizeName"
-                  :value="item.sizeName"
-                />
-              </el-select>
+              <span v-if="row.dims && row.dims.length">{{ formatDims(row.dims) }}</span>
+              <span v-else-if="row.colorName || row.sizeName">{{ row.colorName }} / {{ row.sizeName }}</span>
+              <span v-else style="color: #999;">未选择</span>
             </template>
           </el-table-column>
           <el-table-column label="数量" width="120" align="center">
@@ -287,7 +268,7 @@
                 :min="1"
                 :controls="false"
                 style="width: 100%;"
-                :disabled="!row.sizeName"
+                :disabled="!row.skuId"
                 @change="() => calcItemAmount(row, subIndex)"
               />
             </template>
@@ -300,7 +281,7 @@
                 :precision="2"
                 :controls="false"
                 style="width: 100%;"
-                :disabled="!row.sizeName"
+                :disabled="!row.skuId"
                 @change="() => calcItemAmount(row, subIndex)"
               />
             </template>
@@ -327,6 +308,19 @@
         </el-button>
       </el-card>
     </el-form>
+
+    <!-- SKU选择弹窗 -->
+    <product-sku-select-dialog
+      v-if="skuDialogVisible"
+      :visible="skuDialogVisible"
+      :product-id="skuDialogParams.productId"
+      :product-name="skuDialogParams.productName"
+      :product-no="skuDialogParams.productNo"
+      :default-price="skuDialogParams.defaultPrice"
+      :existing-sku-data="skuDialogParams.existingSkuData"
+      @close="skuDialogVisible = false"
+      @confirm="handleSkuDialogConfirm"
+    />
   </div>
 </template>
 
@@ -334,6 +328,8 @@
 import Sticky from '@/components/Sticky'
 import request from '@/utils/request'
 import waves from '@/directive/waves'
+import { safeJsonParse } from '@/utils'
+import ProductSkuSelectDialog from './ProductSkuSelectDialog'
 
 // 主订单默认值
 const defaultFormData = {
@@ -371,6 +367,7 @@ const defaultItem = {
   productName: '', // 商品名称（原goodsName）
   colorName: '', // 颜色（原color）
   sizeName: '', // 尺码（原size）
+  dims: [], // 存储完整的动态维度数据
   qty: 1,
   price: 0,
   amount: 0,
@@ -381,7 +378,7 @@ const defaultItem = {
 
 export default {
   name: 'OrderForm',
-  components: { Sticky },
+  components: { Sticky, ProductSkuSelectDialog },
   directives: { waves },
   data() {
     return {
@@ -394,6 +391,19 @@ export default {
       customerList: [],
       // 仓库下拉列表数据
       warehouseList: [],
+      // 预计算的合并映射 [subIndex][itemIndex]
+      spanMaps: [],
+      // SKU选择弹窗相关
+      skuDialogVisible: false,
+      skuDialogParams: {
+        subIndex: -1,
+        itemIndex: -1,
+        productId: '',
+        productName: '',
+        productNo: '',
+        defaultPrice: 0,
+        existingSkuData: []
+      },
       // 表单校验规则
       rules: {
         customerId: [{ required: true, message: '请选择客户', trigger: 'change' }],
@@ -456,27 +466,43 @@ export default {
           url: `/erp-service/order/master/${id}/detail`,
           method: 'get'
         })
-        this.formData = data
-        // 格式化子订单时间字段
-        this.formData.subOrders.forEach(sub => {
-          if (sub.expectSendDate) sub.expectSendDate = sub.expectSendDate.slice(0, 10)
-          // 给每个商品明细初始化联动字段（适配新字段名）
-          sub.items.forEach(item => {
-            // 补全缺失的联动字段
-            item.productOptions = item.productOptions || []
-            item.productSearchLoading = false
-            item.skuOptions = item.skuOptions || []
-            item.skuId = item.skuId || ''
-            // 若有productId，加载对应的SKU列表并匹配skuId
-            if (item.productId) {
-              this.loadSkuList(item.productId, sub.items.indexOf(item), sub.items).then(() => {
-                // 加载SKU列表后，若已有颜色和尺码，自动匹配SKUId
-                this.matchSkuId(item)
+
+        // 在赋值前处理数据，确保所有属性都是响应式的（Vue 2 限制）
+        const processedData = data
+        if (processedData && processedData.subOrders) {
+          processedData.subOrders.forEach(sub => {
+            if (sub.expectSendDate) sub.expectSendDate = sub.expectSendDate.slice(0, 10)
+            if (sub.items) {
+              sub.items.forEach(item => {
+                // 初始化搜索相关属性
+                item.productOptions = [{
+                  productId: item.productId,
+                  productNo: item.productNo,
+                  productName: item.productName
+                }]
+                item.productSearchLoading = false
+                item.skuId = item.skuId || ''
+                item.dims = item.dims || []
+
+                // 解析快照恢复规格展示
+                if (item.skuSpecSnapshot) {
+                  const snapshot = safeJsonParse(item.skuSpecSnapshot)
+                  const dims = snapshot.dims || []
+                  item.dims = dims
+                  const sortedDims = [...dims].sort((a, b) => a.order - b.order)
+                  item.colorName = sortedDims[0] ? sortedDims[0].value : ''
+                  item.sizeName = sortedDims[1] ? sortedDims[1].value : ''
+                }
               })
+              // 编辑模式下计算合并
+              this.computeSpanMap(processedData.subOrders.indexOf(sub))
             }
           })
-        })
-        // 加载客户列表和仓库列表（用于回显）
+        }
+
+        this.formData = processedData
+
+        // 加载辅助列表
         await Promise.all([this.loadCustomerList(), this.loadWarehouseList()])
       } catch (err) {
         this.$message.error('加载订单数据失败')
@@ -486,137 +512,159 @@ export default {
       }
     },
 
-    // 1. 款号远程搜索：调用 /api/product/no/name/list 接口
+    // 1. 款号远程搜索
     async remoteSearchProduct(query, subIndex, itemIndex) {
       const item = this.formData.subOrders[subIndex].items[itemIndex]
-      item.productSearchLoading = true
+      this.$set(item, 'productSearchLoading', true)
       try {
         const { data } = await request({
-          url: '/erp-service/product/no/name/list',
+          url: '/erp-service/product/v2/select/list',
           method: 'post',
-          data: { productNo: query } // 传参格式：{productNo: 搜索关键词}
+          data: { keyword: query } // 传参格式：{keyword: 搜索关键词}
         })
-        // 适配 ProductSelectDTO 字段（id→productId，name→productName，wholesalePrice→wholesalePrice）
-        item.productOptions = (data || []).map(product => ({
-          productId: product.id, // 对应 DTO 的 id 字段
-          productNo: product.productNo, // 对应 DTO 的 productNo 字段
-          productName: product.name, // 对应 DTO 的 name 字段
-          wholesalePrice: product.wholesalePrice // 自动回填批发价
+        const options = (data || []).map(product => ({
+          productId: product.id,
+          productNo: product.productNo,
+          productName: product.name,
+          wholesalePrice: product.wholesalePrice
         }))
+        // 使用 $set 确保 Vue 2 能够检测到数组替换并更新视图
+        this.$set(item, 'productOptions', options)
       } catch (err) {
         this.$message.error('款号搜索失败')
         console.error(err)
       } finally {
-        item.productSearchLoading = false
+        this.$set(item, 'productSearchLoading', false)
       }
     },
 
-    // 2. 选择款号后：回显商品名称+加载SKU列表（字段名调整）
+    // 2. 选择款号后：回显商品名称
     async handleProductSelect(productId, subIndex, itemIndex) {
-      const item = this.formData.subOrders[subIndex].items[itemIndex]
+      // 先获取当前明细引用用于检查
+      const currentItem = this.formData.subOrders[subIndex].items[itemIndex]
+
+      // 如果当前行已经选择了 SKU 且有数量，提示确认切换
+      if (currentItem.skuId && currentItem.qty > 0) {
+        try {
+          await this.$confirm('切换款号将清空已选规格和数量，是否继续?', '提示', {
+            type: 'warning'
+          })
+        } catch (e) {
+          // 用户取消，回退 productId (注意：此处 currentItem 仍有效)
+          const oldId = currentItem.productId
+          this.$nextTick(() => {
+            currentItem.productId = oldId
+          })
+          return
+        }
+      }
+
+      // 重新获取最新的明细引用，确保在 await 之后操作的是正确对象
+      const itemToUpdate = this.formData.subOrders[subIndex].items[itemIndex]
+      if (!itemToUpdate) return
+
       // 从搜索结果中匹配商品信息
-      const selectedProduct = item.productOptions.find(opt => opt.productId === productId)
+      const selectedProduct = itemToUpdate.productOptions.find(opt => opt.productId === productId)
       if (selectedProduct) {
-        item.productId = productId // 存储商品ID（对应 DTO 的 id）
-        item.productName = selectedProduct.productName // 回显商品名称（原goodsName）
-        item.productNo = productId // 存储 productId 用于下拉回显（原styleNo）
-        item.price = selectedProduct.wholesalePrice || 0 // 自动填写单价为返回的批发价
-        // 加载该商品对应的SKU列表
-        await this.loadSkuList(productId, itemIndex, this.formData.subOrders[subIndex].items)
-        // 重置颜色、尺码、skuId（字段名调整）
-        item.colorName = ''
-        item.sizeName = ''
-        item.skuId = ''
+        itemToUpdate.productId = productId // 存储商品ID
+        itemToUpdate.productName = selectedProduct.productName // 回显商品名称
+        itemToUpdate.productNo = selectedProduct.productNo // 存储款号字符串
+        itemToUpdate.price = selectedProduct.wholesalePrice || 0 // 自动填写单价为返回的批发价
+
+        itemToUpdate.dims = []
+        itemToUpdate.skuId = ''
         // 重新计算单项金额
-        this.calcItemAmount(item, subIndex)
+        this.calcItemAmount(itemToUpdate, subIndex)
+        // 触发合并重新计算
+        this.computeSpanMap(subIndex)
       }
     },
 
-    // 3. 加载SKU列表：调用 /api/product/get/sku/by/{productId} 接口
-    async loadSkuList(productId, itemIndex, items) {
-      const item = items[itemIndex]
-      try {
-        const { data } = await request({
-          url: `/erp-service/product/get/sku/by/${productId}`,
-          method: 'get'
-        })
-        item.skuOptions = data || [] // 存储SKU列表（含colorName、sizeName、id）
-      } catch (err) {
-        this.$message.error('加载商品规格失败')
-        console.error(err)
+    // 规格选择处理
+    handleSelectSku(subIndex, itemIndex) {
+      const subOrder = this.formData.subOrders[subIndex]
+      const clickedItem = subOrder.items[itemIndex]
+      if (!clickedItem.productId) {
+        return this.$message.warning('请先选择款号')
       }
+
+      // 收集该子订单中所有相同 productId 的 SKU（用于回显）
+      const existingSkuData = subOrder.items
+        .filter(item => item.productId === clickedItem.productId && item.skuId)
+        .map(item => ({
+          skuId: item.skuId,
+          price: item.price,
+          qty: item.qty
+        }))
+
+      // 准备弹窗参数
+      this.skuDialogParams = {
+        subIndex,
+        itemIndex,
+        productId: clickedItem.productId,
+        productName: clickedItem.productName,
+        productNo: clickedItem.productNo,
+        defaultPrice: clickedItem.price || 0,
+        existingSkuData: existingSkuData
+      }
+      this.skuDialogVisible = true
     },
 
-    // 4. 颜色/尺码变更时，自动匹配对应的SKUId（字段名调整：color→colorName、size→sizeName）
-    matchSkuId(item) {
-      // 检查颜色和尺码是否都已填写，且SKU列表非空
-      if (item.colorName && item.sizeName && item.skuOptions.length > 0) {
-        // 从SKU列表中匹配颜色和尺码完全一致的记录
-        const matchedSku = item.skuOptions.find(sku =>
-          sku.colorName === item.colorName && sku.sizeName === item.sizeName
-        )
-        // 找到匹配的SKU，赋值skuId；未找到则清空并提示
-        if (matchedSku) {
-          item.skuId = matchedSku.id
-        } else {
-          item.skuId = ''
-          this.$message.warning(`未找到【${item.colorName}-${item.sizeName}】对应的商品规格，请重新选择`)
+    // SKU选择确认回调
+    handleSkuDialogConfirm(selectedSkus) {
+      if (!selectedSkus || selectedSkus.length === 0) return
+
+      const { subIndex, itemIndex } = this.skuDialogParams
+      const subOrder = this.formData.subOrders[subIndex]
+      const productId = this.skuDialogParams.productId
+
+      // 1. 找到该产品在当前子订单中的第一个出现位置
+      let firstIdx = -1
+      for (let i = 0; i < subOrder.items.length; i++) {
+        if (subOrder.items[i].productId === productId) {
+          firstIdx = i
+          break
         }
-      } else {
-        // 颜色或尺码未填写，清空skuId
-        item.skuId = ''
       }
-    },
+      if (firstIdx === -1) firstIdx = itemIndex
 
-    // 5. 检查同一子订单内是否有重复SKU，有则弹窗提醒（无字段名依赖，无需修改）
-    checkDuplicateSku(currentRow, subIndex) {
-      // 仅当skuId存在时才校验（避免空值误判）
-      if (!currentRow.skuId) return
-      const currentSubOrder = this.formData.subOrders[subIndex]
-      const duplicateRows = []
-      // 遍历当前子订单的所有商品明细，查找相同skuId的行
-      currentSubOrder.items.forEach((item, index) => {
-        // 排除当前行本身，只检查其他行
-        if (item.skuId === currentRow.skuId && item !== currentRow) {
-          duplicateRows.push(index + 1) // 行号从1开始计数
-        }
-      })
-      // 有重复行时弹窗提醒
-      if (duplicateRows.length > 0) {
-        this.$message({
-          type: 'error',
-          message: `该商品已添加在第 ${duplicateRows.join('、')} 行`,
-          duration: 3000
-        })
-      }
-    },
+      // 2. 移除该产品的所有现有行
+      const newItemsList = subOrder.items.filter(item => item.productId !== productId)
 
-    // 辅助方法：获取唯一颜色列表（去重）（无字段名依赖，无需修改）
-    getUniqueColor(skuOptions) {
-      const colorSet = new Set()
-      const uniqueColors = []
-      skuOptions.forEach(sku => {
-        if (!colorSet.has(sku.colorName)) {
-          colorSet.add(sku.colorName)
-          uniqueColors.push({ colorName: sku.colorName })
-        }
-      })
-      return uniqueColors
-    },
-
-    // 辅助方法：根据选中的颜色过滤尺码列表（字段名调整：selectedColor→item.colorName）
-    filterSizeByColor(skuOptions, selectedColor) {
-      if (!selectedColor) return []
-      // 过滤出该颜色对应的所有尺码（去重）
-      const sizeSet = new Set()
-      const filteredSizes = []
-      skuOptions.forEach(sku => {
-        if (sku.colorName === selectedColor && !sizeSet.has(sku.sizeName)) {
-          sizeSet.add(sku.sizeName)
-          filteredSizes.push({ sizeName: sku.sizeName })
+      // 3. 构造新行
+      const addedItems = selectedSkus.map(sku => {
+        return {
+          ...JSON.parse(JSON.stringify(defaultItem)),
+          subId: subOrder.id || '',
+          productId: sku.productId,
+          productNo: sku.productNo,
+          productName: sku.productName,
+          skuId: sku.skuId,
+          colorName: sku.colorName,
+          sizeName: sku.sizeName,
+          dims: sku.dims,
+          price: sku.price,
+          qty: sku.qty,
+          amount: sku.amount,
+          skuSpecSnapshot: sku.skuSpecSnapshot
         }
       })
-      return filteredSizes
+
+      // 4. 在原第一个位置插入新行
+      newItemsList.splice(firstIdx, 0, ...addedItems)
+      subOrder.items = newItemsList
+
+      // 5. 重新计算金额
+      this.calcSubOrderAmount(subIndex)
+      this.calcTotalAmount()
+      this.computeSpanMap(subIndex)
+      this.skuDialogVisible = false
+    },
+
+    // 格式化规格显示
+    formatDims(dims) {
+      if (!dims || !dims.length) return ''
+      return dims.map(d => d.value).join(' / ')
     },
 
     // 提交表单：按场景调用不同接口（核心优化）
@@ -628,12 +676,12 @@ export default {
         if (hasNoItem) {
           return this.$message.warning('所有子订单都必须添加商品明细')
         }
-        // 校验商品明细是否完整（含skuId必填，字段名调整）
+        // 校验商品明细是否完整（含skuId必填）
         const invalidItem = this.formData.subOrders.some(sub =>
-          sub.items.some(item => !item.productId || !item.colorName || !item.sizeName || !item.skuId || !item.qty || !item.price)
+          sub.items.some(item => !item.productId || !item.skuId || !item.qty || !item.price)
         )
         if (invalidItem) {
-          return this.$message.warning('商品明细请完善款号、颜色、尺码、数量、单价信息（需选择有效规格组合）')
+          return this.$message.warning('商品明细请完善款号、规格选择、数量、单价信息')
         }
 
         this.loading = true
@@ -694,12 +742,14 @@ export default {
     addSubOrder() {
       const newSub = JSON.parse(JSON.stringify(defaultSubOrder))
       this.formData.subOrders.push(newSub)
+      this.spanMaps.push([]) // 初始化映射行
       this.$nextTick(() => {
         this.$refs.formRef.clearValidate()
       })
     },
     removeSubOrder(index) {
       this.formData.subOrders.splice(index, 1)
+      this.spanMaps.splice(index, 1)
       this.calcTotalAmount()
     },
 
@@ -708,11 +758,13 @@ export default {
       const newItem = JSON.parse(JSON.stringify(defaultItem))
       newItem.subId = this.formData.subOrders[subIndex].id || ''
       this.formData.subOrders[subIndex].items.push(newItem)
+      this.computeSpanMap(subIndex)
     },
     removeItem(subIndex, itemIndex) {
       this.formData.subOrders[subIndex].items.splice(itemIndex, 1)
       this.calcSubOrderAmount(subIndex)
       this.calcTotalAmount()
+      this.computeSpanMap(subIndex)
     },
     calcItemAmount(row, subIndex) {
       const qty = Number(row.qty || 0)
@@ -743,6 +795,52 @@ export default {
       })
       this.formData.totalQty = totalQty
       this.formData.totalAmount = Number(totalAmount.toFixed(2))
+    },
+
+    // ===== 表格合并逻辑 =====
+    /**
+     * 预计算合并行映射，避免在 handleItemSpanMethod 中频繁循环
+     * @param {number} subIndex
+     */
+    computeSpanMap(subIndex) {
+      const items = this.formData.subOrders[subIndex].items
+      const map = []
+      let i = 0
+      while (i < items.length) {
+        const row = items[i]
+        if (!row.productId) {
+          map[i] = { rowspan: 1, colspan: 1 }
+          i++
+          continue
+        }
+
+        let count = 1
+        for (let j = i + 1; j < items.length; j++) {
+          if (items[j].productId === row.productId) {
+            count++
+          } else {
+            break
+          }
+        }
+
+        map[i] = { rowspan: count, colspan: 1 }
+        for (let k = 1; k < count; k++) {
+          map[i + k] = { rowspan: 0, colspan: 0 }
+        }
+        i += count
+      }
+      this.$set(this.spanMaps, subIndex, map)
+    },
+
+    handleItemSpanMethod({ row, column, rowIndex, columnIndex }, subIndex) {
+      // 合并“款号”、“商品名称”、“选择规格”三列 (对应索引 1, 2, 3)
+      if (columnIndex >= 1 && columnIndex <= 3) {
+        const subMap = this.spanMaps[subIndex]
+        if (subMap && subMap[rowIndex]) {
+          return subMap[rowIndex]
+        }
+        return { rowspan: 1, colspan: 1 }
+      }
     },
 
     // ===== 表格合计行方法（无字段名依赖，无需修改） =====

@@ -36,8 +36,21 @@
 
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="类目ID" prop="categoryId">
-            <el-input v-model="productForm.categoryId" placeholder="请输入类目ID" />
+          <el-form-item label="所属类目" prop="categoryId">
+            <el-select
+              v-model="productForm.categoryId"
+              placeholder="请选择类目"
+              clearable
+              filterable
+              style="width: 100%"
+            >
+              <el-option
+                v-for="item in categoryList"
+                :key="item.dictValue"
+                :label="item.dictName"
+                :value="item.dictValue"
+              />
+            </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -311,7 +324,7 @@ export default {
       rules: {
         productNo: [{ required: true, message: '请输入款号', trigger: 'blur' }],
         name: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
-        categoryId: [{ required: true, message: '请输入类目ID', trigger: 'blur' }],
+        categoryId: [{ required: true, message: '请选择所属类目', trigger: 'change' }],
         costPrice: [{ required: true, message: '请输入成本价', trigger: 'blur' }],
         wholesalePrice: [{ required: true, message: '请输入批发价', trigger: 'blur' }],
         retailPrice: [{ required: true, message: '请输入零售价', trigger: 'blur' }]
@@ -319,6 +332,9 @@ export default {
     }
   },
   computed: {
+    categoryList() {
+      return this.$store.getters['dict/getCategories']
+    },
     sortedDimensions() {
       return [...this.dimensions].sort((a, b) => (a.order || 0) - (b.order || 0))
     },

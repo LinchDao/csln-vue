@@ -255,7 +255,7 @@
 
 <script>
 import Sticky from '@/components/Sticky'
-import ColorSelectDialog from './colordialog.vue'
+import ColorSelectDialog from './ColorDialog.vue'
 import TableImage from '@/components/tableImg'
 import ImageUpload from '@/components/ImageUpload'
 import request from '@/utils/request'

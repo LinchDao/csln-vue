@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :visible="internalVisible"
-    :title="`选择SKU - ${productName}`"
+    :title="`选择规格 - ${productName}`"
     width="70%"
     append-to-body
     @close="handleClose"
@@ -27,10 +27,10 @@
         </template>
       </el-table-column>
       <el-table-column label="条码" prop="barcode" align="center" width="200" />
-      <el-table-column label="采购单价" align="center" width="150">
+      <el-table-column label="单价" align="center" width="200">
         <template slot-scope="scope">
           <el-input-number
-            v-model="scope.row.purchasePrice"
+            v-model="scope.row.price"
             :min="0"
             :precision="2"
             :step="0.01"
@@ -39,10 +39,10 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="采购数量" align="center" width="150">
+      <el-table-column label="数量" align="center" width="150">
         <template slot-scope="scope">
           <el-input-number
-            v-model="scope.row.purchaseQty"
+            v-model="scope.row.qty"
             :min="0"
             :precision="0"
             style="width: 100%;"
@@ -50,9 +50,9 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="单SKU金额" prop="purchaseAmount" align="center" width="150">
+      <el-table-column label="单项金额" prop="amount" align="center" width="150">
         <template slot-scope="scope">
-          {{ (scope.row.purchaseAmount || 0).toFixed(2) }}
+          ¥{{ (scope.row.amount || 0).toFixed(2) }}
         </template>
       </el-table-column>
     </el-table>
@@ -60,8 +60,8 @@
     <div slot="footer" class="dialog-footer">
       <el-button size="small" @click="handleClearAll">清除所有选择</el-button>
       <el-button size="small" @click="handleClose">取消</el-button>
-      <el-button type="primary" size="small" :disabled="!skuList.some(item => item.purchaseQty > 0)" @click="handleSave">
-        保存
+      <el-button type="primary" size="small" :disabled="!skuList.some(item => item.qty > 0)" @click="handleSave">
+        确认选择
       </el-button>
     </div>
   </el-dialog>
@@ -88,11 +88,11 @@ export default {
       type: String,
       default: ''
     },
-    costPrice: {
+    defaultPrice: {
       type: Number,
       default: 0
     },
-    existingSkuData: { // 接收父组件传入的已选SKU数据（全驼峰）
+    existingSkuData: { // 接收当前行或子订单中已选该商品的SKU数据
       type: Array,
       default: () => []
     }
@@ -128,8 +128,8 @@ export default {
     },
     handleClearAll() {
       this.skuList.forEach(item => {
-        item.purchaseQty = 0
-        item.purchaseAmount = 0
+        item.qty = 0
+        item.amount = 0
       })
     },
     // 获取维度值
@@ -209,9 +209,9 @@ export default {
           return 0
         }).map(sku => ({
           ...sku,
-          purchasePrice: this.costPrice || 0,
-          purchaseQty: 0,
-          purchaseAmount: 0
+          price: this.defaultPrice || 0,
+          qty: 0,
+          amount: 0
         }))
 
         // 回显已选数据
@@ -221,34 +221,34 @@ export default {
               item => item.skuId === sku.id
             )
             if (existingItem) {
-              const price = existingItem.price !== undefined ? existingItem.price : (this.costPrice || 0)
+              const price = existingItem.price !== undefined ? existingItem.price : (this.defaultPrice || 0)
               return {
                 ...sku,
-                purchasePrice: price,
-                purchaseQty: existingItem.qty,
-                purchaseAmount: Number((price * existingItem.qty).toFixed(2))
+                price: price,
+                qty: existingItem.qty,
+                amount: Number((price * existingItem.qty).toFixed(2))
               }
             }
             return sku
           })
         }
       } catch (e) {
-        this.$message.error('加载SKU失败')
+        this.$message.error('加载规格列表失败')
       } finally {
         this.loading = false
       }
     },
     computeSkuAmount(row) {
-      row.purchaseAmount = Number((row.purchasePrice * row.purchaseQty).toFixed(2))
+      row.amount = Number((row.price * row.qty).toFixed(2))
     },
     handleSave() {
-      const resultList = this.skuList.map(i => {
-        // 按照 order 排序后取前两个作为 color 和 size 兼容旧版
+      // 仅返回数量大于0的SKU
+      const selectedSkus = this.skuList.filter(item => item.qty > 0)
+      const resultList = selectedSkus.map(i => {
         const sortedDims = [...(i.dims || [])].sort((a, b) => a.order - b.order)
         const colorDim = sortedDims[0]
         const sizeDim = sortedDims[1]
 
-        // 构造快照：包含所有维度和条码
         const snapshotObj = {
           dims: i.dims,
           barcode: i.barcode
@@ -262,10 +262,10 @@ export default {
           colorName: colorDim ? colorDim.value : '',
           sizeName: sizeDim ? sizeDim.value : '',
           dims: i.dims,
-          skuSpecSnapshot: JSON.stringify(snapshotObj), // 生成快照字符串
-          price: i.purchasePrice,
-          qty: i.purchaseQty,
-          amount: Number(i.purchaseAmount.toFixed(2))
+          skuSpecSnapshot: JSON.stringify(snapshotObj),
+          price: i.price,
+          qty: i.qty,
+          amount: Number(i.amount.toFixed(2))
         }
       })
       this.$emit('confirm', resultList)
@@ -285,19 +285,5 @@ export default {
 :deep(.el-select),
 :deep(.el-input-number) {
   width: 100%;
-}
-@media (max-width: 1200px) {
-  :deep(.el-table-column--batch-type) {
-    width: 150px !important;
-  }
-  :deep(.el-table-column--batch-dimension) {
-    width: 180px !important;
-  }
-}
-@media (max-width: 992px) {
-  :deep(.el-table) {
-    min-width: 800px;
-    overflow-x: auto;
-  }
 }
 </style>

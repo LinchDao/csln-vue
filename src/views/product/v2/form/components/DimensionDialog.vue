@@ -7,9 +7,9 @@
   >
     <el-form :model="form" label-width="80px" @submit.native.prevent>
       <el-form-item label="维度名称">
-        <el-input 
-          v-model="form.name" 
-          placeholder="如：颜色、尺码" 
+        <el-input
+          v-model="form.name"
+          placeholder="如：颜色、尺码"
           @input="handleNameInput"
         />
       </el-form-item>
@@ -77,8 +77,8 @@ export default {
         this.$message.error('维度名称已存在')
         return
       }
-      
-      this.$emit('confirm', { 
+
+      this.$emit('confirm', {
         name: name,
         key: this.form.key
       })

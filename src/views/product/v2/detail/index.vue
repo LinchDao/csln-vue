@@ -4,17 +4,17 @@
       <div class="template-section__title">
         商品详情V2
         <div class="header-actions" style="float: right;">
-          <el-button 
-            size="mini" 
-            type="primary" 
-            icon="el-icon-edit" 
+          <el-button
+            size="mini"
+            type="primary"
+            icon="el-icon-edit"
             @click="goToEdit"
           >
             进入编辑
           </el-button>
-          <el-button 
-            size="mini" 
-            icon="el-icon-back" 
+          <el-button
+            size="mini"
+            icon="el-icon-back"
             @click="back"
           >
             返回列表
@@ -40,8 +40,8 @@
         </el-row>
         <el-row class="info-row">
           <el-col :span="8" class="info-item">
-            <div class="info-label">类目ID</div>
-            <div class="info-value">{{ product.categoryId || '-' }}</div>
+            <div class="info-label">所属类目</div>
+            <div class="info-value">{{ getCategoryName(product.categoryId) }}</div>
           </el-col>
           <el-col :span="8" class="info-item">
             <div class="info-label">成本价</div>
@@ -100,17 +100,17 @@
       <!-- 3. SKU 规格多级展示区 -->
       <div class="sku-explore-section">
         <div class="section-title">SKU 规格详情 (级联探索)</div>
-        
+
         <el-row :gutter="20" style="margin-top: 20px;">
           <!-- 左侧：级联展示区 -->
           <el-col :span="16">
             <div v-if="sortedDimensions.length === 0" class="empty-data-hint">
               <p>该商品暂未定义 SKU 维度规格</p>
             </div>
-            <div 
-              v-for="(dim, index) in sortedDimensions" 
-              :key="'level-' + dim.key" 
-              class="level-box" 
+            <div
+              v-for="(dim, index) in sortedDimensions"
+              :key="'level-' + dim.key"
+              class="level-box"
               :class="{ 'is-active': activeLevel === index }"
             >
               <div class="level-header">
@@ -142,11 +142,11 @@
                   </el-table-column>
                   <el-table-column v-if="isMountDim(dim.key)" label="图片" width="120" align="center">
                     <template slot-scope="scope">
-                      <TableImage 
-                        v-if="getDimImage(dim.key, scope.row.value)" 
-                        :image-id="getDimImage(dim.key, scope.row.value)" 
-                        :image-width="60" 
-                        :image-height="60" 
+                      <TableImage
+                        v-if="getDimImage(dim.key, scope.row.value)"
+                        :image-id="getDimImage(dim.key, scope.row.value)"
+                        :image-width="60"
+                        :image-height="60"
                       />
                       <span v-else>-</span>
                     </template>
@@ -156,11 +156,11 @@
                 <!-- 中间层级的图片展示 -->
                 <div v-if="index < sortedDimensions.length - 1 && isMountDim(dim.key) && selectedPath[dim.key]" class="dim-image-preview">
                   <span class="preview-label">{{ dim.name }}[{{ selectedPath[dim.key] }}] 图片:</span>
-                  <TableImage 
-                    v-if="getDimImage(dim.key, selectedPath[dim.key])" 
-                    :image-id="getDimImage(dim.key, selectedPath[dim.key])" 
-                    :image-width="80" 
-                    :image-height="80" 
+                  <TableImage
+                    v-if="getDimImage(dim.key, selectedPath[dim.key])"
+                    :image-id="getDimImage(dim.key, selectedPath[dim.key])"
+                    :image-width="80"
+                    :image-height="80"
                     style="margin-left: 15px;"
                   />
                   <span v-else style="margin-left: 15px; color: #999;">无图片</span>
@@ -218,6 +218,9 @@ export default {
     }
   },
   computed: {
+    categoryList() {
+      return this.$store.getters['dict/getCategories']
+    },
     sortedDimensions() {
       return [...this.dimensions].sort((a, b) => (a.order || 0) - (b.order || 0))
     },
@@ -272,6 +275,11 @@ export default {
     }
   },
   methods: {
+    getCategoryName(id) {
+      if (!id) return '-'
+      const item = this.categoryList.find(c => c.dictValue === id)
+      return item ? item.dictName : id
+    },
     fetchDetail() {
       this.loading = true
       request({
@@ -288,7 +296,7 @@ export default {
             name: d.name,
             order: d.order
           }))
-          
+
           this.initDefaultPath()
         }
       }).finally(() => {

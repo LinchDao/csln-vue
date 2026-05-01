@@ -32,13 +32,22 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label="类目ID">
-            <el-input
+          <el-form-item label="所属类目">
+            <el-select
               v-model="listQuery.categoryId"
-              placeholder="请输入类目ID"
+              placeholder="请选择类目"
               clearable
-              @keyup.enter.native="handleFilter"
-            />
+              filterable
+              style="width: 100%"
+              @change="handleFilter"
+            >
+              <el-option
+                v-for="item in categoryList"
+                :key="item.dictValue"
+                :label="item.dictLabel"
+                :value="item.dictValue"
+              />
+            </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="6">
@@ -147,11 +156,14 @@
       </el-table-column>
 
       <el-table-column
-        label="类目ID"
-        prop="categoryId"
+        label="所属类目"
         align="center"
-        width="120px"
-      />
+        width="150px"
+      >
+        <template slot-scope="{ row }">
+          <span>{{ getCategoryName(row.categoryId) }}</span>
+        </template>
+      </el-table-column>
 
       <el-table-column
         label="品牌"
@@ -230,10 +242,20 @@ export default {
       }
     }
   },
+  computed: {
+    categoryList() {
+      return this.$store.getters['dict/getCategories']
+    }
+  },
   created() {
     this.getList()
   },
   methods: {
+    getCategoryName(id) {
+      if (!id) return '-'
+      const item = this.categoryList.find(c => c.dictValue === id)
+      return item ? item.dictName : id
+    },
     handleDetail(row) {
       this.$router.push({ path: `/product-v2/detail/${row.id}` })
     },

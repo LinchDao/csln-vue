@@ -58,7 +58,10 @@ export default {
   components: { ImageUpload },
   props: {
     visible: Boolean,
-    editData: Object,
+    editData: {
+      type: Object,
+      default: null
+    },
     selectedColorNames: {
       type: Array,
       default: () => []

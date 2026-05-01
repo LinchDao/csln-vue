@@ -164,8 +164,9 @@
         <el-table-column type="index" label="序号" width="70" align="center" />
         <el-table-column label="款号" prop="productNo" align="center" />
         <el-table-column label="商品名称" prop="productName" align="center" />
-        <el-table-column label="颜色" prop="colorName" align="center" />
-        <el-table-column label="尺码" prop="sizeName" align="center" />
+        <el-table-column label="规格" align="center">
+          <template slot-scope="{ row }">{{ formatSkuDims(row) }}</template>
+        </el-table-column>
         <el-table-column label="数量" prop="qty" align="center" />
         <el-table-column label="单价" align="center">
           <template slot-scope="{ row }">¥{{ (row.price || 0).toFixed(2) }}</template>
@@ -196,6 +197,7 @@
 <script>
 import Sticky from '@/components/Sticky'
 import request from '@/utils/request'
+import { safeJsonParse } from '@/utils'
 import UserSelectDialog from '@/components/UserSelect'
 import OrderSubShipDialog from './../page/orderShipDialog.vue'
 
@@ -278,28 +280,35 @@ export default {
       }
     },
     /**
-     * 格式化子订单数据（无改动）
+     * 格式化子订单数据
      */
     formatData(data) {
-      // 配送方式字典转义
+      if (!data) return {}
+      // 配送方式字典转义 (使用 == 兼容字符串/数字比较)
       const deliveryType = this.deliveryTypes.find(item => item.dictValue === data.deliveryType)
       data.deliveryTypeName = deliveryType ? deliveryType.dictName : '未知'
-      // 子订单状态字典转义
+      // 子订单状态字典转义 (使用 == 兼容字符串/数字比较)
       const subStatus = this.subOrderStatusOptions.find(item => item.dictValue === data.status)
       data.statusName = subStatus ? subStatus.dictName : '未知'
+
       // 补全默认值，防止空值报错
       data.items = data.items || []
+      // 计算商品总数量
       data.totalQty = data.items.reduce((total, row) => total + Number(row.qty || 0), 0)
+      // 计算子单总金额（如果后端没返回则前端计算）
+      data.amount = data.amount || data.items.reduce((total, row) => total + Number(row.amount || 0), 0)
+
       return data
     },
     /**
-     * 子订单状态标签类型（无改动）
+     * 子订单状态标签类型
      */
     getStatusTagType(status) {
-      if (status === 1) return 'warning' // 待分配-黄色
-      if (status === 2) return 'primary' // 已分配-蓝色
-      if (status === 3) return 'success' // 已发货-绿色
-      if (status === 4) return 'danger' // 已取消-红色
+      const s = Number(status)
+      if (s === 1) return 'warning' // 待分配-黄色
+      if (s === 2) return 'primary' // 已分配-蓝色
+      if (s === 3) return 'success' // 已发货-绿色
+      if (s === 4) return 'danger' // 已取消-红色
       return '' // 默认-灰色
     },
     /**
@@ -409,6 +418,19 @@ export default {
      */
     handleShipClose() {
       this.shipDialogVisible = false
+    },
+    /**
+     * 格式化规格显示：解析 skuSpecSnapshot
+     */
+    formatSkuDims(row) {
+      if (!row.skuSpecSnapshot) return '-'
+      const snapshot = safeJsonParse(row.skuSpecSnapshot)
+      const dims = snapshot.dims || []
+      if (dims.length > 0) {
+        // 按照 order 排序并拼接规格值
+        return dims.sort((a, b) => (a.order || 0) - (b.order || 0)).map(d => d.value).join(' / ')
+      }
+      return '-'
     }
     // ---------------------- 新增方法结束 ----------------------
   }

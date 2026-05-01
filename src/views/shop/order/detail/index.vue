@@ -140,13 +140,17 @@
         border
         style="width: 100%;"
         show-summary
+        :span-method="(param) => handleItemSpanMethod(param, subIndex)"
         :summary-method="getSummary"
       >
         <el-table-column type="index" label="序号" width="70" align="center" />
         <el-table-column label="款号" prop="productNo" align="center" />
         <el-table-column label="商品名称" prop="productName" align="center" />
-        <el-table-column label="颜色" prop="colorName" align="center" />
-        <el-table-column label="尺码" prop="sizeName" align="center" />
+        <el-table-column label="规格" align="center">
+          <template slot-scope="{ row }">
+            {{ formatDims(row.dims) }}
+          </template>
+        </el-table-column>
         <el-table-column label="数量" prop="qty" align="center" />
         <el-table-column label="单价" align="center">
           <template slot-scope="{ row }">¥{{ (row.price || 0).toFixed(2) }}</template>
@@ -162,6 +166,7 @@
 <script>
 import Sticky from '@/components/Sticky'
 import request from '@/utils/request'
+import { safeJsonParse } from '@/utils'
 
 export default {
   name: 'OrderDetail',
@@ -169,6 +174,8 @@ export default {
   data() {
     return {
       loading: false,
+      // 预计算的合并映射 [subIndex][itemIndex]
+      spanMaps: [],
       formData: {
         id: '',
         orderNo: '',
@@ -230,10 +237,25 @@ export default {
       data.isArName = data.isAr === 1 ? '是' : '否'
       data.allowReplaceName = data.allowReplace === 1 ? '允许' : '不允许'
 
-      data.subOrders = (data.subOrders || []).map(sub => {
+      this.spanMaps = [] // 重置映射
+      data.subOrders = (data.subOrders || []).map((sub, subIndex) => {
         const deliveryType = this.deliveryTypes.find(item => item.dictValue === sub.deliveryType)
+        const items = (sub.items || []).map(item => {
+          if (item.skuSpecSnapshot) {
+            const snapshot = safeJsonParse(item.skuSpecSnapshot)
+            item.dims = snapshot.dims || []
+          } else {
+            item.dims = []
+          }
+          return item
+        })
+
+        // 计算合并映射
+        this.computeSpanMap(subIndex, items)
+
         return {
           ...sub,
+          items,
           deliveryTypeName: deliveryType ? deliveryType.dictName : '未知'
         }
       })
@@ -279,6 +301,53 @@ export default {
     },
     handleEdit() {
       this.$router.push(`/shop/order/edit/${this.formData.id}`)
+    },
+    /**
+     * 预计算合并行映射
+     */
+    computeSpanMap(subIndex, items) {
+      const map = []
+      let i = 0
+      while (i < items.length) {
+        const row = items[i]
+        if (!row.productId) {
+          map[i] = { rowspan: 1, colspan: 1 }
+          i++
+          continue
+        }
+
+        let count = 1
+        for (let j = i + 1; j < items.length; j++) {
+          if (items[j].productId === row.productId) {
+            count++
+          } else {
+            break
+          }
+        }
+
+        map[i] = { rowspan: count, colspan: 1 }
+        for (let k = 1; k < count; k++) {
+          map[i + k] = { rowspan: 0, colspan: 0 }
+        }
+        i += count
+      }
+      this.$set(this.spanMaps, subIndex, map)
+    },
+    // ===== 表格合并逻辑 =====
+    handleItemSpanMethod({ row, column, rowIndex, columnIndex }, subIndex) {
+      // 合并“款号”、“商品名称”两列 (对应索引 1, 2)
+      if (columnIndex >= 1 && columnIndex <= 2) {
+        const subMap = this.spanMaps[subIndex]
+        if (subMap && subMap[rowIndex]) {
+          return subMap[rowIndex]
+        }
+        return { rowspan: 1, colspan: 1 }
+      }
+    },
+    // 格式化规格显示
+    formatDims(dims) {
+      if (!dims || !dims.length) return '-'
+      return dims.map(d => d.value).join(' / ')
     }
   }
 }

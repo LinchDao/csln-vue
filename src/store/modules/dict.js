@@ -111,7 +111,8 @@ const getters = {
   getRoleList: (state, getters) => getters.getDictFromCache(DICT_KEY.ROLE_LIST),
   getCustomerLevels: (state, getters) => getters.getDictFromCache(DICT_KEY.CUSTOMER_LEVEL),
   getLogActionDict: (state, getters) => getters.getDictFromCache(DICT_KEY.LOG_ACTION),
-  getLogModuleDict: (state, getters) => getters.getDictFromCache(DICT_KEY.LOG_MODULE)
+  getLogModuleDict: (state, getters) => getters.getDictFromCache(DICT_KEY.LOG_MODULE),
+  getCategories: (state, getters) => getters.getDictFromCache(DICT_KEY.CATEGORIES)
 }
 
 export default {

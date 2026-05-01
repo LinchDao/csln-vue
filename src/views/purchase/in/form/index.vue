@@ -102,8 +102,11 @@
         <el-table-column label="行号" type="index" align="center" width="80" />
         <el-table-column label="款号" prop="productNo" align="center" min-width="120" />
         <el-table-column label="商品名称" prop="productName" align="center" min-width="180" />
-        <el-table-column label="颜色" prop="colorName" align="center" width="100" />
-        <el-table-column label="尺码" prop="sizeName" align="center" width="100" />
+        <el-table-column label="规格" align="center" min-width="150">
+          <template slot-scope="scope">
+            {{ formatSkuDims(scope.row) }}
+          </template>
+        </el-table-column>
         <el-table-column label="采购数量" prop="qty" align="center" width="120" />
         <el-table-column label="已入库数量" prop="instockedQty" align="center" width="120">
           <template slot-scope="scope">
@@ -364,6 +367,20 @@ export default {
     // 返回采购单列表页
     handleBack() {
       this.$router.push('/purchase/order/page')
+    },
+    // 格式化规格显示
+    formatSkuDims(row) {
+      if (!row.skuSpecSnapshot) return '-'
+      try {
+        const snapshot = JSON.parse(row.skuSpecSnapshot)
+        const dims = snapshot.dims || []
+        if (dims.length > 0) {
+          return dims.sort((a, b) => (a.order || 0) - (b.order || 0)).map(d => d.value).join(' / ')
+        }
+      } catch (e) {
+        console.error('解析规格快照失败', e)
+      }
+      return '-'
     }
   }
 }

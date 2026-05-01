@@ -80,10 +80,13 @@
           <span>{{ (queryParams.page - 1) * queryParams.limit + $index + 1 }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="款号" prop="productNo" min-width="120" align="center" />
+      <el-table-column label="款号" prop="productNo" min-width="200" align="center" />
       <el-table-column label="商品名称" prop="name" min-width="180" align="center" show-overflow-tooltip />
-      <el-table-column label="颜色" prop="colorName" min-width="100" align="center" />
-      <el-table-column label="尺码" prop="sizeName" min-width="100" align="center" />
+      <el-table-column label="规格" min-width="150" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ parseDimension(row.dimensionSignature) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="当前库存" prop="qty" min-width="100" align="center" />
       <el-table-column label="可用库存" min-width="100" align="center">
         <template slot-scope="{ row }">
@@ -146,6 +149,12 @@ export default {
   },
   methods: {
     parseTime,
+    parseDimension(signature) {
+      if (!signature) return '-'
+      return signature.split('|')
+        .map(item => item.includes('=') ? item.split('=')[1] : item)
+        .join('/')
+    },
     async initWarehouseList() {
       try {
         const res = await request({
@@ -161,7 +170,7 @@ export default {
       this.loading = true
       try {
         const res = await request({
-          url: '/erp-service/product/stock/page',
+          url: '/erp-service/stock/page',
           method: 'post',
           data: this.queryParams
         })
